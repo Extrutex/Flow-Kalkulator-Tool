@@ -1,14 +1,26 @@
-# Flow-Kalkulator
+<div align="center">
 
-**Flow ratio calculator for OrcaSlicer: calculate, understand, document.**
+<img src="docs/banner.svg" alt="Flow-Kalkulator" width="100%">
 
-[![test](https://github.com/Extrutex/Flow-Kalkulator-Tool/actions/workflows/test.yml/badge.svg)](https://github.com/Extrutex/Flow-Kalkulator-Tool/actions/workflows/test.yml)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen)
+<h3>Flow ratio calculator for OrcaSlicer: calculate, understand, document.</h3>
 
-**Live:** https://extrutex.github.io/Flow-Kalkulator-Tool/
+<p>
+  <a href="https://extrutex.github.io/Flow-Kalkulator-Tool/"><img src="https://img.shields.io/badge/%E2%96%B6%20Open%20the%20app-ff7a1a?style=for-the-badge&labelColor=a855f7" alt="Open the app"></a>
+</p>
 
-![Flow-Kalkulator screenshot](docs/screenshot.jpg)
+<p>
+  <a href="https://github.com/Extrutex/Flow-Kalkulator-Tool/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/Extrutex/Flow-Kalkulator-Tool/test.yml?label=tests&style=flat-square&labelColor=a855f7&color=14d8c4" alt="tests"></a>
+  <img src="https://img.shields.io/badge/OrcaSlicer-ready-ff7a1a?style=flat-square&labelColor=a855f7" alt="OrcaSlicer ready">
+  <img src="https://img.shields.io/badge/dependencies-zero-ec4899?style=flat-square&labelColor=14d8c4" alt="zero dependencies">
+  <img src="https://img.shields.io/badge/lang-DE%20%7C%20EN-a855f7?style=flat-square&labelColor=ff7a1a" alt="DE | EN">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-14d8c4?style=flat-square&labelColor=ec4899" alt="GPL-3.0"></a>
+</p>
+
+<img src="docs/screenshot.jpg" alt="Flow-Kalkulator screenshot" width="92%">
+
+</div>
+
+<img src="docs/divider.svg" width="100%" height="6" alt="">
 
 You printed the flow calibration blocks in OrcaSlicer and picked the smoothest
 one. What is the new value? And what happens on the *next* calibration, once
@@ -17,12 +29,16 @@ one. What is the new value? And what happens on the *next* calibration, once
 Flow-Kalkulator does the arithmetic, shows each step, and keeps a per-filament
 history. Every applied value becomes the new baseline, the new 100 %.
 
-## Features
+## ✨ Features
 
 - **All OrcaSlicer flow methods**
-  - YOLO (recommended): 11 blocks, −0.05 … +0.05
-  - YOLO Perfectionist: 16 blocks, −0.04 … +0.035
-  - 2-Pass legacy, pass 1 (−20 … +20 %) and pass 2 (−9 … 0 %). Pass 2 opens automatically after pass 1.
+
+  | | Method | Blocks | Range |
+  |---|---|---|---|
+  | ![](https://img.shields.io/badge/-YOLO-a855f7?style=flat-square) | recommended | 11 | −0.05 … +0.05 |
+  | ![](https://img.shields.io/badge/-Perfectionist-ff7a1a?style=flat-square) | fine steps | 16 | −0.04 … +0.035 |
+  | ![](https://img.shields.io/badge/-2--Pass-14d8c4?style=flat-square) | legacy, pass 2 follows pass 1 | 9 + 10 | −20 … +20 %, then −9 … 0 % |
+  | ![](https://img.shields.io/badge/-Single%20wall-ec4899?style=flat-square) | calipers, classic | any | your readings |
 - **Classic single-wall cube** (calipers): enter the line width set in the slicer
   and as many wall readings as you like. You get mean, spread and standard deviation,
   an exaggerated wall cross-section and a dot plot of your readings.
@@ -41,13 +57,15 @@ history. Every applied value becomes the new baseline, the new 100 %.
 - German and English, dark and light theme, works on phones.
 - **No build step, no dependencies, no tracking.** Data stays in your browser (`localStorage`).
 
-## Formulas
+<img src="docs/divider.svg" width="100%" height="6" alt="">
 
-| Method | New flow ratio |
-|---|---|
-| YOLO / YOLO Perfectionist | `old + modifier` |
-| 2-Pass (pass 1 and pass 2) | `old × (100 + modifier) / 100` |
-| Single-wall cube | `old × line_width / measured_wall` |
+## 🧮 Formulas
+
+| | Method | New flow ratio |
+|---|---|---|
+| 🟣 | YOLO / YOLO Perfectionist | `old + modifier` |
+| 🟠 | 2-Pass (pass 1 and pass 2) | `old × (100 + modifier) / 100` |
+| 🩷 | Single-wall cube | `old × line_width / measured_wall` |
 
 Slicer formulas and block ranges follow the
 [OrcaSlicer wiki: Flow ratio calibration](https://github.com/OrcaSlicer/OrcaSlicer/wiki/flow_ratio_calib).
@@ -57,7 +75,7 @@ In OrcaSlicer the flow ratio lives in the **filament** profile.
 
 At a baseline of `1.00` both readings give the same result. Anywhere else they don't:
 
-| Baseline | Correction | YOLO (additive) | 2-Pass (percent) |
+| Baseline | Correction | 🟣 YOLO (additive) | 🟠 2-Pass (percent) |
 |---|---|---|---|
 | 1.00 | −5 | 0.9500 | 0.9500 |
 | 0.90 | −5 | 0.8500 | 0.8550 |
@@ -65,7 +83,9 @@ At a baseline of `1.00` both readings give the same result. Anywhere else they d
 So always enter the modifier printed on the block together with the method you
 actually printed. The calculator picks the right formula.
 
-## Workflow
+<img src="docs/divider.svg" width="100%" height="6" alt="">
+
+## 🔁 Workflow
 
 1. Enter the current flow ratio from your OrcaSlicer filament profile.
 2. Pick the method you printed.
@@ -74,7 +94,9 @@ actually printed. The calculator picks the right formula.
 5. Press **Apply and save as new baseline**. The value moves into the history and
    becomes the starting point for the next test.
 
-## Run locally
+<img src="docs/divider.svg" width="100%" height="6" alt="">
+
+## 💻 Run locally
 
 Open the hosted version, or serve the folder with any static web server.
 ES modules do not load from `file://`.
@@ -86,7 +108,7 @@ npm start            # python3 -m http.server 8080
 # open http://localhost:8080
 ```
 
-## Tests
+## ✅ Tests
 
 The calculation core (`src/flow.js`) has no DOM dependencies and is tested with
 Node's built-in test runner:
@@ -97,7 +119,7 @@ npm test
 
 Requires Node 20 or newer. No `npm install` needed.
 
-## Project layout
+## 🗂 Project layout
 
 ```
 index.html         page skeleton
@@ -109,13 +131,15 @@ src/styles.css     themes and layout
 test/              node:test suite for the core
 ```
 
-## Deployment
+## 🚀 Deployment
 
 Every push to `main` runs the tests and publishes the site to GitHub Pages
 (`.github/workflows/pages.yml`). In the repository settings, set
 **Pages → Source** to **GitHub Actions** once.
 
-## Auf Deutsch
+<img src="docs/divider.svg" width="100%" height="6" alt="">
+
+## 🇩🇪 Auf Deutsch
 
 Der Flow-Kalkulator rechnet den neuen Flow-Wert für OrcaSlicer aus: YOLO,
 YOLO Perfektionist, 2-Pass und den klassischen Einwand-Würfel mit Messschieber.
@@ -123,11 +147,19 @@ Jeder übernommene Wert wird zur neuen Basis, also zu den neuen 100 %, und lande
 im Verlauf des jeweiligen Filaments. Oberfläche auf Deutsch und Englisch. Alle
 Daten bleiben lokal im Browser.
 
-## Contributing
+## 🤝 Contributing
 
 Issues and pull requests are welcome. Please keep the tool dependency-free and
 add a test in `test/` for every change to `src/flow.js`.
 
-## License
+<img src="docs/divider.svg" width="100%" height="6" alt="">
+
+## 📄 License
+
+<div align="center">
 
 [GPL-3.0](LICENSE) © Extrutex
+
+<sub>Made for people who measure before they guess.</sub>
+
+</div>
