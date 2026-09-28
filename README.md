@@ -6,6 +6,7 @@
 
 <p>
   <a href="https://extrutex.github.io/Flow-Kalkulator-Tool/"><img src="https://img.shields.io/badge/%E2%96%B6%20Open%20the%20app-ff7a1a?style=for-the-badge&labelColor=a855f7" alt="Open the app"></a>
+  <a href="https://ko-fi.com/3dw_sebastianwindt"><img src="https://img.shields.io/badge/%E2%98%95%20Support%20on%20Ko--fi-a855f7?style=for-the-badge" alt="Support on Ko-fi"></a>
 </p>
 
 <p>
@@ -159,6 +160,8 @@ add a test in `test/` for every change to `src/flow.js`.
 <div align="center">
 
 [GPL-3.0](LICENSE) © Extrutex
+
+If the calculator saved you a spool, you can [buy me a coffee on Ko-fi](https://ko-fi.com/3dw_sebastianwindt). ☕
 
 <sub>Made for people who measure before they guess.</sub>
 
