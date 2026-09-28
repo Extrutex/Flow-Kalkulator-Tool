@@ -3,9 +3,155 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Flow-Kalkulator</title>
-  <meta name="description" content="Flow ratio calculator for OrcaSlicer: YOLO, 2-pass and single-wall calibration with history and charts.">
+  <title>Flow-Kalkulator – OrcaSlicer Flow Ratio Rechner (YOLO, 2-Pass, Einwand-Würfel)</title>
+  <meta name="description" content="Kostenloser Flow-Rechner für OrcaSlicer: neuen Flow-Wert aus YOLO-, 2-Pass- oder Einwand-Würfel-Kalibrierung berechnen, Rechenweg sehen, Verlauf je Filament speichern. Flow ratio calculator, DE/EN.">
+  <meta name="keywords" content="OrcaSlicer Flow Ratio, Flow Rate Kalibrierung, Flow Kalibrierung Rechner, Extrusionsmultiplikator, YOLO Flow, Einwand Würfel, flow ratio calculator, flow rate calibration, Bambu Lab, Klipper">
+  <meta name="author" content="Extrutex">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#131821">
+  <link rel="canonical" href="https://extrutex.github.io/Flow-Kalkulator-Tool/">
+  <link rel="alternate" hreflang="de" href="https://extrutex.github.io/Flow-Kalkulator-Tool/">
+  <link rel="alternate" hreflang="en" href="https://extrutex.github.io/Flow-Kalkulator-Tool/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://extrutex.github.io/Flow-Kalkulator-Tool/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Flow-Kalkulator">
+  <meta property="og:title" content="Flow-Kalkulator – OrcaSlicer Flow Ratio Rechner">
+  <meta property="og:description" content="Neuen Flow-Wert aus YOLO, 2-Pass oder Einwand-Würfel berechnen. Mit Rechenweg, Verlauf je Filament und Diagrammen. Kostenlos, Open Source.">
+  <meta property="og:url" content="https://extrutex.github.io/Flow-Kalkulator-Tool/">
+  <meta property="og:image" content="https://extrutex.github.io/Flow-Kalkulator-Tool/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Flow-Kalkulator: OrcaSlicer Flow Ratio Rechner">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Flow-Kalkulator – OrcaSlicer Flow Ratio Rechner">
+  <meta name="twitter:description" content="YOLO, 2-Pass und Einwand-Würfel: neuer Flow-Wert mit Rechenweg und Verlauf.">
+  <meta name="twitter:image" content="https://extrutex.github.io/Flow-Kalkulator-Tool/assets/og-image.png">
+
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Flow-Kalkulator",
+    "alternateName": "OrcaSlicer Flow Ratio Calculator",
+    "url": "https://extrutex.github.io/Flow-Kalkulator-Tool/",
+    "description": "Kostenloser Flow-Rechner für OrcaSlicer: YOLO, YOLO Perfektionist, 2-Pass und Einwand-Würfel mit Messschieber. Verlauf je Filament, Diagramme, CSV-Export.",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any (web browser)",
+    "inLanguage": [
+      "de",
+      "en"
+    ],
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Extrutex",
+      "url": "https://github.com/Extrutex"
+    },
+    "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+    "codeRepository": "https://github.com/Extrutex/Flow-Kalkulator-Tool",
+    "image": "https://extrutex.github.io/Flow-Kalkulator-Tool/assets/og-image.png",
+    "keywords": "OrcaSlicer, Flow Ratio, Flow Rate, Flow Kalibrierung, Extrusionsmultiplikator, YOLO, 3D-Druck, Klipper, Bambu Lab"
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Wie berechne ich den neuen Flow-Wert in OrcaSlicer?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Bei der YOLO-Kalibrierung addierst du den Modifier des glattesten Blocks zum alten Wert: Flow neu = Flow alt + Modifier, z. B. 0.98 + 0.01 = 0.99. Beim klassischen 2-Pass-Verfahren rechnest du prozentual: Flow neu = Flow alt × (100 + Modifier) / 100."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Warum ist der neue Flow-Wert danach das neue 100 %?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Jede weitere Kalibrierung startet vom zuletzt gespeicherten Wert. Wird aus 1.00 der Wert 0.95, rechnet der nächste Test von 0.95 aus. Deshalb liefern additive (YOLO) und prozentuale (2-Pass) Korrekturen unterschiedliche Ergebnisse, sobald die Basis nicht mehr 1.00 ist."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Wie funktioniert die Flow-Kalibrierung mit dem Einwand-Würfel?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Drucke einen einwandigen Würfel (Vase-Modus), miss die Wandstärke mit dem Messschieber auf allen Seiten und vergleiche den Mittelwert mit der Linienbreite im Slicer: Flow neu = Flow alt × Linienbreite / gemessene Wandstärke."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Wo stelle ich den Flow-Wert in OrcaSlicer ein?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Der Flow-Wert (Flow ratio) steht im Filament-Profil. Nach der Kalibrierung trägst du den neuen Wert dort ein und speicherst das Profil."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Funktioniert der Rechner auch für Bambu Studio, PrusaSlicer oder Klipper-Drucker?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Ja. Die Einwand-Methode ist slicerunabhängig und entspricht dem Extrusionsmultiplikator in PrusaSlicer und SuperSlicer. Die YOLO- und 2-Pass-Formeln folgen dem OrcaSlicer-Wiki; Bambu Studio basiert auf derselben Codebasis."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I calculate the new flow ratio in OrcaSlicer?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For YOLO calibration add the modifier of the smoothest block to the old value: new = old + modifier, e.g. 0.98 + 0.01 = 0.99. For the legacy 2-pass method it is a percentage: new = old × (100 + modifier) / 100."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does the new flow ratio become the new 100 %?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Every further calibration starts from the last saved value. Once 1.00 has become 0.95, the next test starts from 0.95. That is why additive (YOLO) and percent (2-pass) corrections differ as soon as the baseline is no longer 1.00."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does single-wall cube flow calibration work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Print a single-wall cube (vase mode), measure the wall on every side with calipers and compare the mean with the line width in the slicer: new = old × line width / measured wall."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Where do I set the flow ratio in OrcaSlicer?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The flow ratio lives in the filament profile. After calibrating, enter the new value there and save the profile."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does it work for Bambu Studio, PrusaSlicer or Klipper printers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The single-wall method is slicer independent and equals the extrusion multiplier in PrusaSlicer and SuperSlicer. The YOLO and 2-pass formulas follow the OrcaSlicer wiki; Bambu Studio shares the same code base."
+        }
+      }
+    ]
+  }
+]
+  </script>
   <link rel="stylesheet" href="src/styles.css">
 </head>
 <body>
@@ -42,7 +188,23 @@
         </label>
         <button type="button" class="btn ghost" id="filament-add" data-i18n="addFilament"></button>
         <button type="button" class="btn ghost" id="filament-rename" data-i18n="renameFilament"></button>
+        <button type="button" class="btn ghost danger" id="filament-delete" data-i18n="deleteFilament"></button>
       </div>
+      <form class="filament-form" id="filament-form" hidden>
+        <label class="field grow">
+          <span data-i18n="filamentName"></span>
+          <input id="filament-name" type="text" maxlength="60" autocomplete="off" data-i18n-placeholder="filamentNamePlaceholder">
+        </label>
+        <label class="field" id="filament-start-field">
+          <span data-i18n="filamentStart"></span>
+          <input id="filament-start" type="number" inputmode="decimal" step="0.001" min="0.5" max="1.5" value="1.000">
+        </label>
+        <div class="row">
+          <button type="submit" class="btn primary small" id="filament-save"></button>
+          <button type="button" class="btn ghost small" id="filament-cancel" data-i18n="cancel"></button>
+        </div>
+        <p class="form-error" id="filament-error" role="alert"></p>
+      </form>
 
       <label class="field ratio-field">
         <span data-i18n="currentRatio"></span>
@@ -162,6 +324,53 @@
         <a href="https://github.com/OrcaSlicer/OrcaSlicer/wiki/flow_ratio_calib" target="_blank" rel="noopener" data-i18n="source"></a>
         · <span data-i18n="storedLocally"></span>
       </p>
+    </section>
+    <section class="card faq" id="faq">
+      <h2 data-i18n="faqTitle"></h2>
+      <div class="faq-list" lang="de" data-content-lang="de">
+        <details>
+          <summary>Wie berechne ich den neuen Flow-Wert in OrcaSlicer?</summary>
+          <p>Bei der YOLO-Kalibrierung addierst du den Modifier des glattesten Blocks zum alten Wert: Flow neu = Flow alt + Modifier, z. B. 0.98 + 0.01 = 0.99. Beim klassischen 2-Pass-Verfahren rechnest du prozentual: Flow neu = Flow alt × (100 + Modifier) / 100.</p>
+        </details>
+        <details>
+          <summary>Warum ist der neue Flow-Wert danach das neue 100 %?</summary>
+          <p>Jede weitere Kalibrierung startet vom zuletzt gespeicherten Wert. Wird aus 1.00 der Wert 0.95, rechnet der nächste Test von 0.95 aus. Deshalb liefern additive (YOLO) und prozentuale (2-Pass) Korrekturen unterschiedliche Ergebnisse, sobald die Basis nicht mehr 1.00 ist.</p>
+        </details>
+        <details>
+          <summary>Wie funktioniert die Flow-Kalibrierung mit dem Einwand-Würfel?</summary>
+          <p>Drucke einen einwandigen Würfel (Vase-Modus), miss die Wandstärke mit dem Messschieber auf allen Seiten und vergleiche den Mittelwert mit der Linienbreite im Slicer: Flow neu = Flow alt × Linienbreite / gemessene Wandstärke.</p>
+        </details>
+        <details>
+          <summary>Wo stelle ich den Flow-Wert in OrcaSlicer ein?</summary>
+          <p>Der Flow-Wert (Flow ratio) steht im Filament-Profil. Nach der Kalibrierung trägst du den neuen Wert dort ein und speicherst das Profil.</p>
+        </details>
+        <details>
+          <summary>Funktioniert der Rechner auch für Bambu Studio, PrusaSlicer oder Klipper-Drucker?</summary>
+          <p>Ja. Die Einwand-Methode ist slicerunabhängig und entspricht dem Extrusionsmultiplikator in PrusaSlicer und SuperSlicer. Die YOLO- und 2-Pass-Formeln folgen dem OrcaSlicer-Wiki; Bambu Studio basiert auf derselben Codebasis.</p>
+        </details>
+      </div>
+      <div class="faq-list" lang="en" data-content-lang="en">
+        <details>
+          <summary>How do I calculate the new flow ratio in OrcaSlicer?</summary>
+          <p>For YOLO calibration add the modifier of the smoothest block to the old value: new = old + modifier, e.g. 0.98 + 0.01 = 0.99. For the legacy 2-pass method it is a percentage: new = old × (100 + modifier) / 100.</p>
+        </details>
+        <details>
+          <summary>Why does the new flow ratio become the new 100 %?</summary>
+          <p>Every further calibration starts from the last saved value. Once 1.00 has become 0.95, the next test starts from 0.95. That is why additive (YOLO) and percent (2-pass) corrections differ as soon as the baseline is no longer 1.00.</p>
+        </details>
+        <details>
+          <summary>How does single-wall cube flow calibration work?</summary>
+          <p>Print a single-wall cube (vase mode), measure the wall on every side with calipers and compare the mean with the line width in the slicer: new = old × line width / measured wall.</p>
+        </details>
+        <details>
+          <summary>Where do I set the flow ratio in OrcaSlicer?</summary>
+          <p>The flow ratio lives in the filament profile. After calibrating, enter the new value there and save the profile.</p>
+        </details>
+        <details>
+          <summary>Does it work for Bambu Studio, PrusaSlicer or Klipper printers?</summary>
+          <p>Yes. The single-wall method is slicer independent and equals the extrusion multiplier in PrusaSlicer and SuperSlicer. The YOLO and 2-pass formulas follow the OrcaSlicer wiki; Bambu Studio shares the same code base.</p>
+        </details>
+      </div>
     </section>
   </main>
 

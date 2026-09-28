@@ -22,6 +22,10 @@ const defaults = () => ({
 });
 
 let state = load();
+try {
+  const qLang = new URLSearchParams(location.search).get('lang');
+  if (qLang === 'de' || qLang === 'en') state.lang = qLang;
+} catch { /* ignore */ }
 let selected = null; // modifier of the chosen block (not persisted)
 
 function load() {
@@ -105,6 +109,11 @@ function renderFilaments() {
   }));
   const input = $('current-ratio');
   if (document.activeElement !== input) input.value = fmtRatio(fil().current);
+  const single = Object.keys(state.filaments).length < 2;
+  const del = $('filament-delete');
+  del.disabled = single;
+  del.title = single ? t('lastFilament') : '';
+  if (formMode) $('filament-save').textContent = t(formMode === 'create' ? 'create' : 'saveName');
 }
 
 function renderMethods() {
@@ -412,6 +421,91 @@ function slug(s) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'filament';
 }
 
+// ---------- filament management ----------
+
+let formMode = null; // 'create' | 'rename' | null
+
+function openFilamentForm(mode) {
+  formMode = mode;
+  const form = $('filament-form');
+  form.hidden = false;
+  $('filament-error').textContent = '';
+  $('filament-start-field').hidden = mode !== 'create';
+  $('filament-name').value = mode === 'rename' ? fil().name : '';
+  $('filament-start').value = fmtRatio(mode === 'create' ? 1 : fil().current);
+  $('filament-save').textContent = t(mode === 'create' ? 'create' : 'saveName');
+  $('filament-name').focus();
+  $('filament-name').select();
+}
+
+function closeFilamentForm() {
+  formMode = null;
+  $('filament-form').hidden = true;
+  $('filament-error').textContent = '';
+}
+
+function submitFilamentForm() {
+  const name = $('filament-name').value.trim().replace(/\s+/g, ' ');
+  const error = $('filament-error');
+  if (!name) { error.textContent = t('errNameEmpty'); return; }
+  const taken = Object.entries(state.filaments).some(([id, f]) =>
+    f.name.toLowerCase() === name.toLowerCase() && !(formMode === 'rename' && id === state.activeId));
+  if (taken) { error.textContent = t('errNameTaken'); return; }
+
+  if (formMode === 'create') {
+    const start = parseFloat($('filament-start').value.replace(',', '.'));
+    if (!(start >= 0.5 && start <= 1.5)) { error.textContent = t('errRatio'); return; }
+    const id = `${slug(name)}-${Date.now().toString(36)}`;
+    state.filaments[id] = { name, start: round(start, 4), current: round(start, 4), history: [] };
+    state.activeId = id;
+    selected = null;
+  } else if (formMode === 'rename') {
+    fil().name = name;
+  }
+  save();
+  closeFilamentForm();
+  render();
+}
+
+function deleteFilament() {
+  const ids = Object.keys(state.filaments);
+  if (ids.length < 2) return;
+  const idx = ids.indexOf(state.activeId);
+  delete state.filaments[state.activeId];
+  const rest = Object.keys(state.filaments);
+  state.activeId = rest[Math.max(0, idx - 1)];
+  selected = null;
+  closeFilamentForm();
+  save();
+  render();
+}
+
+/**
+ * Two-step destructive button: first click arms it ("Really delete?"),
+ * second click within 4 s runs the action. No blocking browser dialogs.
+ */
+function armable(btn, labelKey, action) {
+  let timer = null;
+  const disarm = () => {
+    clearTimeout(timer);
+    timer = null;
+    btn.classList.remove('armed');
+    btn.textContent = t(labelKey);
+  };
+  btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    if (!timer) {
+      btn.classList.add('armed');
+      btn.textContent = t(labelKey === 'reset' ? 'confirmReset' : 'confirmDelete');
+      timer = setTimeout(disarm, 4000);
+      return;
+    }
+    disarm();
+    action();
+  });
+  btn.addEventListener('blur', () => { if (timer) disarm(); });
+}
+
 // ---------- wiring ----------
 
 function bind() {
@@ -432,30 +526,24 @@ function bind() {
   });
 
   $('filament-select').addEventListener('change', (e) => {
+    closeFilamentForm();
     state.activeId = e.target.value;
     selected = null;
     save();
     render();
   });
 
-  $('filament-add').addEventListener('click', () => {
-    const name = prompt(t('newFilamentPrompt'), '')?.trim();
-    if (!name) return;
-    const id = `${slug(name)}-${Date.now().toString(36)}`;
-    state.filaments[id] = { name, start: 1, current: 1, history: [] };
-    state.activeId = id;
-    selected = null;
-    save();
-    render();
+  $('filament-add').addEventListener('click', () => openFilamentForm('create'));
+  $('filament-rename').addEventListener('click', () => openFilamentForm('rename'));
+  $('filament-cancel').addEventListener('click', closeFilamentForm);
+  $('filament-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitFilamentForm();
   });
-
-  $('filament-rename').addEventListener('click', () => {
-    const name = prompt(t('newFilamentPrompt'), fil().name)?.trim();
-    if (!name) return;
-    fil().name = name;
-    save();
-    render();
+  $('filament-form').addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeFilamentForm();
   });
+  armable($('filament-delete'), 'deleteFilament', deleteFilament);
 
   const ratio = $('current-ratio');
   ratio.addEventListener('input', () => setCurrent(parseFloat(ratio.value.replace(',', '.'))));
@@ -492,8 +580,7 @@ function bind() {
     download(`flow-${slug(f.name)}.csv`, historyToCsv(f.name, chain(f.start, f.history)), 'text/csv;charset=utf-8');
   });
   $('print-btn').addEventListener('click', () => window.print());
-  $('reset-btn').addEventListener('click', () => {
-    if (!confirm(t('confirmReset'))) return;
+  armable($('reset-btn'), 'reset', () => {
     const f = fil();
     f.history = [];
     f.start = f.current;

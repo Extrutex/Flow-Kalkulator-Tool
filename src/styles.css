@@ -38,6 +38,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 html, body { margin: 0; }
 
@@ -95,8 +96,18 @@ h3 { font-size: 0.9rem; color: var(--muted); font-weight: 600; margin-bottom: 4p
   grid-template-areas:
     "inputs result"
     "history history"
-    "explain formulas";
+    "explain formulas"
+    "faq faq";
 }
+.faq { grid-area: faq; }
+.faq details { border-bottom: 1px solid var(--line); padding: 10px 0; }
+.faq details:last-child { border-bottom: 0; }
+.faq summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; gap: 10px; }
+.faq summary::before { content: "+"; color: var(--accent); font-family: var(--mono); width: 1ch; }
+.faq details[open] summary::before { content: "−"; }
+.faq details p { margin: 8px 0 0 calc(1ch + 10px); color: var(--muted); }
+html[lang="de"] .faq-list[data-content-lang="en"],
+html[lang="en"] .faq-list[data-content-lang="de"] { display: none; }
 .inputs { grid-area: inputs; }
 .result { grid-area: result; align-self: start; }
 .history { grid-area: history; }
@@ -106,7 +117,7 @@ h3 { font-size: 0.9rem; color: var(--muted); font-weight: 600; margin-bottom: 4p
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "inputs" "result" "history" "explain" "formulas";
+    grid-template-areas: "inputs" "result" "history" "explain" "formulas" "faq";
   }
 }
 
@@ -123,6 +134,7 @@ h3 { font-size: 0.9rem; color: var(--muted); font-weight: 600; margin-bottom: 4p
 .row { display: flex; gap: 8px; align-items: flex-end; }
 .row.wrap { flex-wrap: wrap; gap: 16px; }
 .row.between { justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.row.between .row { flex-wrap: wrap; }
 .grow { flex: 1; }
 
 /* ---------- form ---------- */
@@ -164,6 +176,21 @@ input[type="range"] { accent-color: var(--accent); width: 220px; max-width: 100%
   border-color: transparent; color: #1a0d02; padding: 12px 16px; font-size: 0.95rem;
 }
 :root[data-theme="light"] .btn.primary { color: #fff; }
+
+/* ---------- filament form ---------- */
+.filament-row { flex-wrap: wrap; }
+.filament-row .grow { min-width: 180px; }
+.filament-form {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
+  padding: 12px; border-radius: 12px; border: 1px dashed var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, var(--bg-2));
+}
+.filament-form[hidden] { display: none; }
+.filament-form .grow { min-width: 180px; }
+#filament-start-field { width: 130px; }
+.form-error { flex-basis: 100%; margin: 0; color: var(--over); font-size: 0.85rem; }
+.form-error:empty { display: none; }
+.btn.armed { border-color: var(--over); color: var(--over); background: color-mix(in srgb, var(--over) 12%, transparent); }
 
 /* ---------- methods ---------- */
 .methods { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 8px; }

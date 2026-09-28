@@ -142,16 +142,20 @@ Every push to `main` runs the tests and publishes the site to GitHub Pages
 
 ## 🇩🇪 Auf Deutsch
 
-Der Flow-Kalkulator rechnet den neuen Flow-Wert für OrcaSlicer aus: YOLO,
-YOLO Perfektionist, 2-Pass und den klassischen Einwand-Würfel mit Messschieber.
+**Flow-Kalkulator ist ein kostenloser Flow-Rechner für OrcaSlicer.** Du hast die
+Flow-Kalibrierung gedruckt und den glattesten Block gewählt? Der Rechner ermittelt
+den neuen Flow-Wert (Flow ratio, Extrusionsmultiplikator) für alle Methoden:
+
+- **YOLO** und **YOLO Perfektionist**: `Flow neu = Flow alt + Modifier`
+- **2-Pass** (Pass 1 und Pass 2): `Flow neu = Flow alt × (100 + Modifier) / 100`
+- **Einwand-Würfel mit Messschieber**: `Flow neu = Flow alt × Linienbreite / gemessene Wand`
+
 Jeder übernommene Wert wird zur neuen Basis, also zu den neuen 100 %, und landet
-im Verlauf des jeweiligen Filaments. Oberfläche auf Deutsch und Englisch. Alle
-Daten bleiben lokal im Browser.
+im Verlauf des jeweiligen Filaments, mit Diagramm, CSV-Export und druckbarem
+Protokoll. Funktioniert auch für Bambu Studio, PrusaSlicer und Klipper-Drucker.
+Oberfläche auf Deutsch und Englisch, alle Daten bleiben lokal im Browser.
 
-## 🤝 Contributing
-
-Issues and pull requests are welcome. Please keep the tool dependency-free and
-add a test in `test/` for every change to `src/flow.js`.
+👉 **[Flow-Kalkulator öffnen](https://extrutex.github.io/Flow-Kalkulator-Tool/)**
 
 <img src="docs/divider.svg" width="100%" height="6" alt="">
 
