@@ -1,0 +1,13 @@
+{
+  "name": "flow-kalkulator-tool",
+  "version": "0.1.0",
+  "description": "Flow ratio calculator for OrcaSlicer calibration (YOLO, 2-pass, single-wall) with calibration history and charts. Zero dependencies.",
+  "type": "module",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "start": "python3 -m http.server 8080"
+  },
+  "engines": { "node": ">=20" }
+}

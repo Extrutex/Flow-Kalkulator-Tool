@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flow-Kalkulator</title>
+  <meta name="description" content="Flow ratio calculator for OrcaSlicer: YOLO, 2-pass and single-wall calibration with history and charts.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+        <rect x="4" y="26" width="32" height="4" rx="2" class="logo-line l1"/>
+        <rect x="4" y="19" width="32" height="4" rx="2" class="logo-line l2"/>
+        <rect x="4" y="12" width="32" height="4" rx="2" class="logo-line l3"/>
+        <path d="M20 2 L26 9 H14 Z" class="logo-nozzle"/>
+      </svg>
+      <div>
+        <h1>Flow-Kalkulator</h1>
+        <p class="tagline" data-i18n="tagline"></p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="seg" role="group" aria-label="Language">
+        <button type="button" data-lang="de">DE</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+      <button type="button" class="icon-btn" id="theme-toggle" data-i18n-title="theme" aria-label="Theme">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card inputs">
+      <div class="row filament-row">
+        <label class="field grow">
+          <span data-i18n="filament"></span>
+          <select id="filament-select"></select>
+        </label>
+        <button type="button" class="btn ghost" id="filament-add" data-i18n="addFilament"></button>
+        <button type="button" class="btn ghost" id="filament-rename" data-i18n="renameFilament"></button>
+      </div>
+
+      <label class="field ratio-field">
+        <span data-i18n="currentRatio"></span>
+        <div class="ratio-input">
+          <button type="button" class="nudge" data-nudge="-0.005" aria-label="-0.005">−</button>
+          <input id="current-ratio" type="number" inputmode="decimal" step="0.001" min="0.5" max="1.5" value="1.000">
+          <button type="button" class="nudge" data-nudge="0.005" aria-label="+0.005">+</button>
+        </div>
+        <small data-i18n="currentRatioHint"></small>
+      </label>
+
+      <div class="field">
+        <span data-i18n="method"></span>
+        <div class="methods" id="methods" role="tablist"></div>
+      </div>
+
+      <div id="panel-blocks">
+        <h2 data-i18n="pickBlock"></h2>
+        <p class="muted" data-i18n="pickBlockHint"></p>
+        <div class="blocks" id="blocks"></div>
+        <div class="scale">
+          <span class="under" data-i18n="under"></span>
+          <span class="bar"></span>
+          <span class="over" data-i18n="over"></span>
+        </div>
+        <p class="tiny muted" data-i18n="illustration"></p>
+      </div>
+
+      <div id="panel-wall" hidden>
+        <div class="row wrap">
+          <label class="field">
+            <span data-i18n="wallNominal"></span>
+            <input id="wall-nominal" type="number" inputmode="decimal" step="0.01" min="0.1" max="2" value="0.45">
+            <small data-i18n="wallNominalHint"></small>
+          </label>
+        </div>
+        <div class="field">
+          <span data-i18n="wallMeasure"></span>
+          <div class="measurements" id="measurements"></div>
+          <small data-i18n="wallMeasureHint"></small>
+        </div>
+        <div class="wall-viz">
+          <figure>
+            <figcaption data-i18n="wallSection"></figcaption>
+            <svg id="wall-section" viewBox="0 0 320 150" role="img"></svg>
+          </figure>
+          <figure>
+            <figcaption><span data-i18n="spread"></span></figcaption>
+            <svg id="wall-dots" viewBox="0 0 320 150" role="img"></svg>
+          </figure>
+        </div>
+        <div class="stats" id="wall-stats"></div>
+      </div>
+    </section>
+
+    <section class="card result" id="result" aria-live="polite">
+      <h2 data-i18n="result"></h2>
+      <div class="big-wrap">
+        <output class="big" id="result-value">—</output>
+        <button type="button" class="btn ghost small" id="copy-btn" data-i18n="copy" disabled></button>
+      </div>
+      <div class="gauge" id="gauge"></div>
+      <dl class="kv">
+        <dt data-i18n="stepChange"></dt><dd id="result-step">—</dd>
+        <dt data-i18n="formula"></dt><dd id="result-formula" class="mono">—</dd>
+      </dl>
+      <p class="base-note" id="base-note"></p>
+      <ul class="warnings" id="warnings"></ul>
+      <label class="field">
+        <span data-i18n="note"></span>
+        <input id="note" type="text" maxlength="120" data-i18n-placeholder="notePlaceholder">
+      </label>
+      <button type="button" class="btn primary" id="apply-btn" data-i18n="apply" disabled></button>
+    </section>
+
+    <section class="card history">
+      <div class="row between">
+        <h2 data-i18n="history"></h2>
+        <div class="row">
+          <button type="button" class="btn ghost small" id="undo-btn" data-i18n="undo"></button>
+          <button type="button" class="btn ghost small" id="csv-btn" data-i18n="exportCsv"></button>
+          <button type="button" class="btn ghost small" id="print-btn" data-i18n="printProtocol"></button>
+          <button type="button" class="btn ghost small danger" id="reset-btn" data-i18n="reset"></button>
+        </div>
+      </div>
+      <svg id="history-chart" viewBox="0 0 720 260" role="img" aria-label="history chart"></svg>
+      <div class="table-wrap"><table id="history-table"></table></div>
+      <p class="muted" id="history-empty" data-i18n="historyEmpty"></p>
+    </section>
+
+    <section class="card explain">
+      <h2 data-i18n="explainTitle"></h2>
+      <p data-i18n="explainBody"></p>
+      <div class="row wrap explain-controls">
+        <label class="field">
+          <span data-i18n="explainBase"></span>
+          <input id="ex-base" type="range" min="0.80" max="1.10" step="0.01" value="0.90">
+          <output id="ex-base-out" class="mono"></output>
+        </label>
+        <label class="field">
+          <span data-i18n="explainStep"></span>
+          <input id="ex-step" type="range" min="-10" max="10" step="1" value="-5">
+          <output id="ex-step-out" class="mono"></output>
+        </label>
+      </div>
+      <svg id="explain-chart" viewBox="0 0 720 200" role="img"></svg>
+    </section>
+
+    <section class="card formulas">
+      <h2 data-i18n="formulas"></h2>
+      <div class="formula-grid">
+        <div><h3 data-i18n="f_yolo"></h3><p class="mono">Flow<sub>neu</sub> = Flow<sub>alt</sub> + Modifier</p></div>
+        <div><h3 data-i18n="f_pass"></h3><p class="mono">Flow<sub>neu</sub> = Flow<sub>alt</sub> × (100 + Modifier) / 100</p></div>
+        <div><h3 data-i18n="f_wall"></h3><p class="mono">Flow<sub>neu</sub> = Flow<sub>alt</sub> × Soll / Ist</p></div>
+      </div>
+      <p class="tiny muted">
+        <a href="https://github.com/OrcaSlicer/OrcaSlicer/wiki/flow_ratio_calib" target="_blank" rel="noopener" data-i18n="source"></a>
+        · <span data-i18n="storedLocally"></span>
+      </p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>Flow-Kalkulator · GPL-3.0 · <a href="https://github.com/Extrutex/Flow-Kalkulator-Tool" target="_blank" rel="noopener">github.com/Extrutex/Flow-Kalkulator-Tool</a></span>
+  </footer>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
