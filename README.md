@@ -53,6 +53,9 @@ history. Every applied value becomes the new baseline, the new 100 %.
 - **Calibration history per filament**: chart and table with the change per step
   and in total. Undo, CSV export (semicolon separated, opens directly in German Excel)
   and a printable protocol.
+- **Walls & surfaces**: converts between the flow you want on an area (top/bottom
+  surface, outer/inner wall) and the factor to enter in OrcaSlicer's process profile,
+  with the calculation shown. Factor 1.00 means "same as the filament".
 - **"Why the new 100 % matters"**: interactive comparison of additive and percent
   corrections for any baseline.
 - German and English, dark and light theme, works on phones.
@@ -67,6 +70,19 @@ history. Every applied value becomes the new baseline, the new 100 %.
 | 🟣 | YOLO / YOLO Perfectionist | `old + modifier` |
 | 🟠 | 2-Pass (pass 1 and pass 2) | `old × (100 + modifier) / 100` |
 | 🩷 | Single-wall cube | `old × line_width / measured_wall` |
+
+### Walls and surfaces
+
+The flow ratios in the **process** profile (Quality → Walls and surfaces) are factors
+on top of the filament flow ratio. `1.00` means: exactly the filament value.
+
+```
+printed flow = filament flow ratio × area factor
+factor       = target flow / filament flow ratio      e.g. 0.92 / 0.875 = 1.051
+```
+
+Top and bottom surface always apply. Outer and inner wall only apply with
+**Set other flow ratios** checked.
 
 Slicer formulas and block ranges follow the
 [OrcaSlicer wiki: Flow ratio calibration](https://github.com/OrcaSlicer/OrcaSlicer/wiki/flow_ratio_calib).
@@ -152,7 +168,9 @@ den neuen Flow-Wert (Flow ratio, Extrusionsmultiplikator) für alle Methoden:
 
 Jeder übernommene Wert wird zur neuen Basis, also zu den neuen 100 %, und landet
 im Verlauf des jeweiligen Filaments, mit Diagramm, CSV-Export und druckbarem
-Protokoll. Funktioniert auch für Bambu Studio, PrusaSlicer und Klipper-Drucker.
+Protokoll. Der Abschnitt **Wände & Oberflächen** rechnet zwischen gewünschtem Flow
+und Faktor im Prozessprofil um: `Faktor = Ziel-Flow / Filament-Flow`, z. B.
+0.92 / 0.875 = 1.051. Faktor 1.00 heißt: genau wie im Filament. Funktioniert auch für Bambu Studio, PrusaSlicer und Klipper-Drucker.
 Oberfläche auf Deutsch und Englisch, alle Daten bleiben lokal im Browser.
 
 👉 **[Flow-Kalkulator öffnen](https://extrutex.github.io/Flow-Kalkulator-Tool/)**

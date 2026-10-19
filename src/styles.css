@@ -95,6 +95,7 @@ h3 { font-size: 0.9rem; color: var(--muted); font-weight: 600; margin-bottom: 4p
   grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
   grid-template-areas:
     "inputs result"
+    "areas areas"
     "history history"
     "explain formulas"
     "faq faq";
@@ -111,13 +112,14 @@ html[lang="en"] .faq-list[data-content-lang="de"] { display: none; }
 .inputs { grid-area: inputs; }
 .result { grid-area: result; align-self: start; }
 .history { grid-area: history; }
+.areas { grid-area: areas; }
 .explain { grid-area: explain; }
 .formulas { grid-area: formulas; }
 
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "inputs" "result" "history" "explain" "formulas" "faq";
+    grid-template-areas: "inputs" "result" "areas" "history" "explain" "formulas" "faq";
   }
 }
 
@@ -294,6 +296,29 @@ th { color: var(--muted); font-weight: 600; font-size: 0.76rem; text-transform: 
 td.num { font-family: var(--mono); text-align: right; }
 td.note { white-space: normal; color: var(--muted); }
 
+/* ---------- walls & surfaces ---------- */
+.areas p { margin: 0; }
+.areas-base { color: var(--muted); font-size: 0.9rem; }
+.areas-base b { color: var(--text); font-size: 1.15rem; }
+.area-list { display: grid; gap: 10px; }
+.area {
+  display: grid; gap: 8px 14px; align-items: end;
+  grid-template-columns: minmax(150px, 1.3fr) minmax(90px, 0.6fr) minmax(90px, 0.6fr) minmax(170px, 1.2fr);
+  padding: 12px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px;
+}
+.area .name b { display: block; }
+.area .name small { display: block; color: var(--muted); font: 0.74rem var(--mono); overflow-wrap: anywhere; }
+.area .name .tag { color: var(--warn); font-family: var(--sans); }
+.area input { font-family: var(--mono); }
+.area .calc { font: 0.9rem var(--mono); padding-bottom: 9px; }
+.area .calc.changed b { color: var(--accent); }
+.area .calc.bad { color: var(--warn); }
+@media (max-width: 640px) {
+  .area { grid-template-columns: 1fr 1fr; }
+  .area .name, .area .calc { grid-column: 1 / -1; }
+  .area .calc { padding-bottom: 0; }
+}
+
 /* ---------- explain / formulas ---------- */
 .explain p { margin: 0; color: var(--muted); }
 .explain-controls output { font-size: 0.9rem; }
@@ -312,7 +337,7 @@ svg .grid-line { stroke: var(--line); stroke-dasharray: 3 4; }
 @media print {
   :root { --bg: #fff; --card: #fff; --card-2: #fff; --bg-2: #fff; --text: #000; --muted: #444; --line: #bbb; }
   body { background: #fff; }
-  .top-actions, .inputs, .result, .explain, .formulas .tiny, .history .row .row, .foot { display: none !important; }
+  .top-actions, .inputs, .result, .areas, .explain, .formulas .tiny, .history .row .row, .foot { display: none !important; }
   .grid { display: block; }
   .card { box-shadow: none; border: 0; padding: 0; }
 }

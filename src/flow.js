@@ -168,6 +168,38 @@ export function edgeHint(method, modifier) {
   return null;
 }
 
+// ---------- walls & surfaces (process profile) ----------
+//
+// In OrcaSlicer the area flow ratios in the process profile are factors on
+// top of the filament flow ratio (GCode.cpp):
+//   printed flow = filament flow ratio × area factor
+// A factor of 1.00 means "same as the filament". Top and bottom surface always
+// apply; the other areas only with "Set other flow ratios" checked.
+
+export const AREAS = [
+  { id: 'top', key: 'top_solid_infill_flow_ratio', always: true },
+  { id: 'bottom', key: 'bottom_solid_infill_flow_ratio', always: true },
+  { id: 'outerWall', key: 'outer_wall_flow_ratio', always: false },
+  { id: 'innerWall', key: 'inner_wall_flow_ratio', always: false },
+];
+
+/** Factor OrcaSlicer accepts for an area. */
+export const FACTOR_LIMITS = { min: 0, max: 2 };
+
+/** Flow actually printed in an area. */
+export function areaFlow(filament, factor) {
+  assertRatio(filament);
+  if (!Number.isFinite(factor) || factor < 0) throw new RangeError('area factor must be >= 0');
+  return round(filament * factor, 6);
+}
+
+/** Factor to enter in OrcaSlicer so an area prints with the target flow. */
+export function areaFactor(filament, target) {
+  assertRatio(filament);
+  if (!Number.isFinite(target) || target <= 0) throw new RangeError('target flow must be > 0');
+  return round(target / filament, 6);
+}
+
 function assertRatio(r) {
   if (!Number.isFinite(r) || r <= 0) throw new RangeError('flow ratio must be a positive number');
 }

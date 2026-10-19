@@ -1,6 +1,7 @@
 import {
   METHODS, applyModifier, singleWall, chain, compareInterpretations,
   warnings, edgeHint, historyToCsv, relativeChangePct, round,
+  AREAS, areaFlow, areaFactor, FACTOR_LIMITS,
 } from './flow.js';
 import { STRINGS, detectLang } from './i18n.js';
 import { surfacePattern, gauge, historyChart, wallSection, wallDots, explainChart } from './charts.js';
@@ -288,6 +289,81 @@ function renderResult() {
   }));
 }
 
+// Area factors live per filament (f.areas[id]), like the value you set in
+// OrcaSlicer. The target flow is derived: filament × factor.
+const areaFactorOf = (id) => fil().areas?.[id] ?? 1;
+
+function renderAreas() {
+  $('area-list').replaceChildren(...AREAS.map((area) => {
+    const row = document.createElement('div');
+    row.className = 'area';
+    row.dataset.area = area.id;
+    row.innerHTML = `
+      <div class="name"><b></b><small class="key"></small><small class="tag"></small></div>
+      <label class="field"><span></span><input type="number" inputmode="decimal" step="0.005" min="0.1" max="3" data-role="target"></label>
+      <label class="field"><span></span><input type="number" inputmode="decimal" step="0.01" min="0" max="2" data-role="factor"></label>
+      <div class="calc"></div>`;
+    row.querySelector('.name b').textContent = t(`a_${area.id}`);
+    row.querySelector('.key').textContent = state.lang === 'de' ? `${t(`k_${area.id}`)} · ${area.key}` : area.key;
+    row.querySelector('.tag').textContent = area.always ? '' : t('otherOnly');
+    const [targetLabel, factorLabel] = row.querySelectorAll('.field span');
+    targetLabel.textContent = t('targetFlow');
+    factorLabel.textContent = t('factor');
+    const target = row.querySelector('[data-role="target"]');
+    const factor = row.querySelector('[data-role="factor"]');
+    target.addEventListener('input', () => {
+      const n = parseFloat(target.value.replace(',', '.'));
+      if (!(n > 0)) return;
+      setAreaFactor(area.id, areaFactor(fil().current, n));
+    });
+    factor.addEventListener('input', () => {
+      const n = parseFloat(factor.value.replace(',', '.'));
+      if (!(n >= 0)) return;
+      setAreaFactor(area.id, n);
+    });
+    target.addEventListener('blur', renderAreaValues);
+    factor.addEventListener('blur', renderAreaValues);
+    return row;
+  }));
+  renderAreaValues();
+}
+
+function setAreaFactor(id, value) {
+  const f = fil();
+  f.areas = { ...f.areas, [id]: round(value, 4) };
+  if (Math.abs(f.areas[id] - 1) < 1e-9) delete f.areas[id];
+  save();
+  renderAreaValues();
+}
+
+/** Refresh numbers only; the input being typed in keeps its text and focus. */
+function renderAreaValues() {
+  const filament = fil().current;
+  $('areas-filament').textContent = fmtRatio(filament);
+  for (const area of AREAS) {
+    const row = $('area-list').querySelector(`[data-area="${area.id}"]`);
+    if (!row) continue;
+    const factor = areaFactorOf(area.id);
+    const flow = areaFlow(filament, factor);
+    const target = row.querySelector('[data-role="target"]');
+    const factorInput = row.querySelector('[data-role="factor"]');
+    if (document.activeElement !== target) target.value = flow.toFixed(3);
+    if (document.activeElement !== factorInput) factorInput.value = factor.toFixed(3);
+    const calc = row.querySelector('.calc');
+    const same = Math.abs(factor - 1) < 1e-9;
+    const bad = factor < FACTOR_LIMITS.min || factor > FACTOR_LIMITS.max;
+    calc.className = `calc${same ? '' : ' changed'}${bad ? ' bad' : ''}`;
+    calc.innerHTML = '<span></span> <b></b>';
+    if (same) {
+      calc.querySelector('span').textContent = `${fmtRatio(filament)} × 1.000 = ${flow.toFixed(3)}`;
+      calc.querySelector('b').textContent = t('sameAsFilament');
+    } else {
+      calc.querySelector('span').textContent = `${flow.toFixed(3)} ÷ ${fmtRatio(filament)} =`;
+      calc.querySelector('b').textContent = bad ? `${factor.toFixed(3)} (${t('factorRange')})` : factor.toFixed(3);
+    }
+  }
+}
+
 function renderHistory() {
   const f = fil();
   const rows = chain(f.start, f.history);
@@ -352,6 +428,7 @@ function render() {
   renderBlocks();
   renderWall();
   renderResult();
+  renderAreas();
   renderHistory();
   renderExplain();
 }
@@ -369,6 +446,7 @@ function setCurrent(v) {
   renderFilaments();
   renderBlocks();
   renderResult();
+  renderAreaValues();
   renderHistory();
 }
 

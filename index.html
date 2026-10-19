@@ -102,6 +102,14 @@
       },
       {
         "@type": "Question",
+        "name": "Im Filament steht 0.875, bei Wänden und Oberfläche 1.00 – muss der Wert hoch?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "1.00 im Prozessprofil heißt: genau wie im Filament-Profil, gedruckt wird also mit 0.875. Ist die Oberfläche nicht geschlossen, muss der Faktor über 1.00. Rechnung: Faktor = Ziel-Flow / Filament-Flow, z. B. 0.92 / 0.875 = 1.051. Den Faktor trägst du unter Qualität → Wände und Oberflächen ein."
+        }
+      },
+      {
+        "@type": "Question",
         "name": "Funktioniert der Rechner auch für Bambu Studio, PrusaSlicer oder Klipper-Drucker?",
         "acceptedAnswer": {
           "@type": "Answer",
@@ -138,6 +146,14 @@
         "acceptedAnswer": {
           "@type": "Answer",
           "text": "The flow ratio lives in the filament profile. After calibrating, enter the new value there and save the profile."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "The filament says 0.875 and walls and top surface say 1.00. Does the value have to go up?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "1.00 in the process profile means: exactly the filament value, so it prints at 0.875. If the top surface is not closed, the factor has to go above 1.00. Calculation: factor = target flow / filament flow, e.g. 0.92 / 0.875 = 1.051. Enter the factor under Quality → Walls and surfaces."
         }
       },
       {
@@ -280,6 +296,16 @@
       <button type="button" class="btn primary" id="apply-btn" data-i18n="apply" disabled></button>
     </section>
 
+    <section class="card areas" id="areas">
+      <div class="row between">
+        <h2 data-i18n="areasTitle"></h2>
+        <p class="areas-base"><span data-i18n="areasBase"></span> <b class="mono" id="areas-filament"></b></p>
+      </div>
+      <p class="muted" data-i18n="areasIntro"></p>
+      <div class="area-list" id="area-list"></div>
+      <p class="tiny muted" data-i18n="areasTestNote"></p>
+    </section>
+
     <section class="card history">
       <div class="row between">
         <h2 data-i18n="history"></h2>
@@ -319,6 +345,7 @@
         <div><h3 data-i18n="f_yolo"></h3><p class="mono">Flow<sub>neu</sub> = Flow<sub>alt</sub> + Modifier</p></div>
         <div><h3 data-i18n="f_pass"></h3><p class="mono">Flow<sub>neu</sub> = Flow<sub>alt</sub> × (100 + Modifier) / 100</p></div>
         <div><h3 data-i18n="f_wall"></h3><p class="mono">Flow<sub>neu</sub> = Flow<sub>alt</sub> × Soll / Ist</p></div>
+        <div><h3 data-i18n="f_area"></h3><p class="mono">Faktor = Ziel-Flow / Filament-Flow</p></div>
       </div>
       <p class="tiny muted">
         <a href="https://github.com/OrcaSlicer/OrcaSlicer/wiki/flow_ratio_calib" target="_blank" rel="noopener" data-i18n="source"></a>
@@ -345,6 +372,10 @@
           <p>Der Flow-Wert (Flow ratio) steht im Filament-Profil. Nach der Kalibrierung trägst du den neuen Wert dort ein und speicherst das Profil.</p>
         </details>
         <details>
+          <summary>Im Filament steht 0.875, bei Wänden und Oberfläche 1.00 – muss der Wert hoch?</summary>
+          <p>1.00 im Prozessprofil heißt: genau wie im Filament-Profil, gedruckt wird also mit 0.875. Ist die Oberfläche nicht geschlossen, muss der Faktor über 1.00. Rechnung: Faktor = Ziel-Flow / Filament-Flow, z. B. 0.92 / 0.875 = 1.051. Den Faktor trägst du unter Qualität → Wände und Oberflächen ein.</p>
+        </details>
+        <details>
           <summary>Funktioniert der Rechner auch für Bambu Studio, PrusaSlicer oder Klipper-Drucker?</summary>
           <p>Ja. Die Einwand-Methode ist slicerunabhängig und entspricht dem Extrusionsmultiplikator in PrusaSlicer und SuperSlicer. Die YOLO- und 2-Pass-Formeln folgen dem OrcaSlicer-Wiki; Bambu Studio basiert auf derselben Codebasis.</p>
         </details>
@@ -365,6 +396,10 @@
         <details>
           <summary>Where do I set the flow ratio in OrcaSlicer?</summary>
           <p>The flow ratio lives in the filament profile. After calibrating, enter the new value there and save the profile.</p>
+        </details>
+        <details>
+          <summary>The filament says 0.875 and walls and top surface say 1.00. Does the value have to go up?</summary>
+          <p>1.00 in the process profile means: exactly the filament value, so it prints at 0.875. If the top surface is not closed, the factor has to go above 1.00. Calculation: factor = target flow / filament flow, e.g. 0.92 / 0.875 = 1.051. Enter the factor under Quality → Walls and surfaces.</p>
         </details>
         <details>
           <summary>Does it work for Bambu Studio, PrusaSlicer or Klipper printers?</summary>
