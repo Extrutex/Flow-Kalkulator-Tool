@@ -1,7 +1,6 @@
 import {
   METHODS, applyModifier, singleWall, chain, compareInterpretations,
   warnings, edgeHint, historyToCsv, relativeChangePct, round,
-  areaTable, outerWallFactorFromWall, PLAUSIBLE,
 } from './flow.js';
 import { STRINGS, detectLang } from './i18n.js';
 import { surfacePattern, gauge, historyChart, wallSection, wallDots, explainChart } from './charts.js';
@@ -20,9 +19,6 @@ const defaults = () => ({
     default: { name: 'PLA', start: 1, current: 1, history: [] },
   },
   wall: { nominal: 0.45, readings: [null, null, null, null] },
-  // Process profile (Quality → Walls and surfaces). Shared by all filaments,
-  // like the process preset in OrcaSlicer.
-  process: { print: 1, other: false, mode: 'factor', factors: {} },
 });
 
 let state = load();
@@ -39,12 +35,7 @@ function load() {
     const data = JSON.parse(raw);
     const base = defaults();
     if (!data.filaments || !data.filaments[data.activeId]) return base;
-    return {
-      ...base,
-      ...data,
-      wall: { ...base.wall, ...data.wall },
-      process: { ...base.process, ...data.process, factors: { ...data.process?.factors } },
-    };
+    return { ...base, ...data, wall: { ...base.wall, ...data.wall } };
   } catch {
     return defaults();
   }
@@ -62,12 +53,6 @@ const $ = (id) => document.getElementById(id);
 
 const fmtRatio = (v, d = 3) => (Number.isFinite(v) ? v.toFixed(d) : '—');
 const fmtPct = (v, d = 2) => (Number.isFinite(v) ? `${v > 0 ? '+' : v < 0 ? '−' : '±'}${Math.abs(v).toFixed(d)} %` : '—');
-/** Area factor: at least 2 decimals, up to 4 if needed (1.0211 stays 1.0211). */
-const fmtFactor = (v) => {
-  if (!Number.isFinite(v)) return '—';
-  const r = round(v, 4);
-  return Number(r.toFixed(2)) === r ? r.toFixed(2) : String(r);
-};
 const fmtSigned = (v, d) => `${v > 0 ? '+' : v < 0 ? '−' : '±'}${Math.abs(v).toFixed(d)}`;
 
 function modLabel(method, m) {
@@ -198,7 +183,6 @@ function renderWall() {
         state.wall.readings[i] = Number.isFinite(n) && n > 0 ? n : null;
         save();
         renderResult();
-        renderAreaValues();
         renderWallViz();
       });
       wrap.append(label, input);
@@ -304,120 +288,6 @@ function renderResult() {
   }));
 }
 
-function processRows(r = compute()) {
-  const p = state.process;
-  return areaTable({
-    oldFilament: fil().current,
-    newFilament: r?.value,
-    print: p.print,
-    other: p.other,
-    factors: p.factors,
-    mode: p.mode,
-  });
-}
-
-function renderAreas() {
-  const p = state.process;
-  const r = compute();
-  const rows = processRows(r);
-  const printInput = $('print-ratio');
-  if (document.activeElement !== printInput) printInput.value = p.print.toFixed(2);
-  $('other-ratios').checked = p.other;
-  document.querySelectorAll('[data-mode]').forEach((b) => b.classList.toggle('on', b.dataset.mode === p.mode));
-  $('areas-mode-hint').textContent = t(p.mode === 'factor' ? 'modeFactorHint' : 'modeEffectiveHint');
-
-  const table = $('areas-table');
-  const head = document.createElement('thead');
-  head.innerHTML = '<tr><th></th><th></th><th class="num"></th><th class="num"></th><th class="num"></th><th class="num"></th></tr>';
-  const labels = [t('colArea'), t('colKey'), t('colFactor'), t('colEffNow'), t('colEffNew'), t('colSet')];
-  head.querySelectorAll('th').forEach((th, i) => { th.textContent = labels[i]; });
-  const outside = (v) => v < PLAUSIBLE.min || v > PLAUSIBLE.max;
-  const body = document.createElement('tbody');
-  for (const row of rows) {
-    const tr = document.createElement('tr');
-    if (!row.active) tr.className = 'off';
-    const cell = (text, cls) => {
-      const td = document.createElement('td');
-      td.textContent = text;
-      if (cls) td.className = cls;
-      tr.append(td);
-      return td;
-    };
-    cell(t(`a_${row.id}`));
-    cell(state.lang === 'de' ? `${t(`k_${row.id}`)} (${row.key})` : row.key, 'key');
-    const td = cell('', 'num');
-    const input = document.createElement('input');
-    input.type = 'number';
-    input.inputMode = 'decimal';
-    input.step = '0.01';
-    input.min = '0';
-    input.max = '2';
-    input.value = fmtFactor(row.factor);
-    input.setAttribute('aria-label', t(`a_${row.id}`));
-    input.addEventListener('input', () => {
-      const n = parseFloat(input.value.replace(',', '.'));
-      if (!(n >= 0 && n <= 2)) return;
-      if (Math.abs(n - 1) < 1e-9) delete p.factors[row.id];
-      else p.factors[row.id] = round(n, 4);
-      save();
-      renderAreaValues();
-    });
-    input.addEventListener('blur', () => { input.value = fmtFactor(p.factors[row.id] ?? 1); });
-    td.append(input);
-    cell('', 'num eff-old');
-    cell('', 'num eff-new');
-    cell('', 'num set');
-    body.append(tr);
-  }
-  table.replaceChildren(head, body);
-  renderAreaValues(r, rows, outside);
-}
-
-/** Update numbers and notes without rebuilding the inputs (keeps focus while typing). */
-function renderAreaValues(r = compute(), rows = processRows(r), outside = (v) => v < PLAUSIBLE.min || v > PLAUSIBLE.max) {
-  const p = state.process;
-  const trs = $('areas-table').querySelectorAll('tbody tr');
-  rows.forEach((row, i) => {
-    const tr = trs[i];
-    if (!tr) return;
-    tr.classList.toggle('off', !row.active);
-    const old = tr.querySelector('.eff-old');
-    old.textContent = fmtRatio(row.effOld, 4);
-    old.classList.toggle('bad', row.active && outside(row.effOld));
-    const neu = tr.querySelector('.eff-new');
-    neu.textContent = r ? fmtRatio(row.effNew, 4) : '—';
-    neu.classList.toggle('bad', Boolean(r) && row.active && outside(row.effNew));
-    const set = tr.querySelector('.set');
-    set.classList.toggle('changed', row.changed);
-    if (!row.active) set.textContent = t('inactive');
-    else if (row.changed) set.textContent = fmtFactor(row.setFactor);
-    else set.textContent = `${fmtFactor(row.factor)} · ${t('unchanged')}`;
-  });
-
-  const notes = [];
-  if (!r) notes.push({ text: t('n_noResult'), info: true });
-  if (Math.abs(p.print - 1) > 1e-9) notes.push({ text: t('n_print').replace('{p}', p.print.toFixed(2)) });
-  const active = rows.filter((row) => row.active);
-  const badEff = active.filter((row) => outside(row.effOld) || (r && outside(row.effNew)));
-  if (badEff.length) notes.push({ text: t('n_effRange').replace('{list}', badEff.map((row) => t(`a_${row.id}`)).join(', ')) });
-  const badFactor = active.filter((row) => row.outOfRange);
-  if (badFactor.length) notes.push({ text: t('n_factorRange').replace('{list}', badFactor.map((row) => t(`a_${row.id}`)).join(', ')) });
-  if (r?.wall) {
-    const wallRow = rows.find((row) => row.id === 'outerWall');
-    const v = outerWallFactorFromWall(wallRow.active ? wallRow.factor : 1, state.wall.nominal, r.wall.mean);
-    notes.push({ text: t('n_wallOnly').replace('{f}', fmtRatio(fil().current)).replace('{v}', fmtRatio(v, 3)), info: true });
-  }
-  if (r && p.mode === 'effective' && active.some((row) => row.changed)) notes.push({ text: t('n_saved'), info: true });
-  notes.push({ text: t('n_calib'), info: true });
-  if (p.other) notes.push({ text: t('n_calibOther') });
-  $('areas-notes').replaceChildren(...notes.map((n) => {
-    const li = document.createElement('li');
-    li.textContent = n.text;
-    if (n.info) li.className = 'info';
-    return li;
-  }));
-}
-
 function renderHistory() {
   const f = fil();
   const rows = chain(f.start, f.history);
@@ -482,7 +352,6 @@ function render() {
   renderBlocks();
   renderWall();
   renderResult();
-  renderAreas();
   renderHistory();
   renderExplain();
 }
@@ -500,7 +369,6 @@ function setCurrent(v) {
   renderFilaments();
   renderBlocks();
   renderResult();
-  renderAreaValues();
   renderHistory();
 }
 
@@ -516,13 +384,6 @@ function applyResult() {
     to: r.value,
     note: $('note').value.trim(),
   });
-  // "Keep effective": the rescaled factors are what the user now enters in Orca.
-  if (state.process.mode === 'effective') {
-    for (const row of processRows(r)) {
-      if (!row.changed) continue;
-      state.process.factors[row.id] = round(row.setFactor, 4);
-    }
-  }
   f.current = r.value;
   $('note').value = '';
   selected = null;
@@ -698,7 +559,6 @@ function bind() {
     state.wall.nominal = n;
     save();
     renderResult();
-    renderAreaValues();
     renderWallViz();
   });
 
@@ -728,25 +588,6 @@ function bind() {
     render();
   });
 
-  $('print-ratio').addEventListener('input', (e) => {
-    const n = parseFloat(e.target.value.replace(',', '.'));
-    if (!(n >= 0.5 && n <= 1.5)) return;
-    state.process.print = round(n, 4);
-    save();
-    renderAreaValues();
-  });
-  $('print-ratio').addEventListener('blur', (e) => { e.target.value = state.process.print.toFixed(2); });
-  $('other-ratios').addEventListener('change', (e) => {
-    state.process.other = e.target.checked;
-    save();
-    renderAreaValues();
-  });
-  document.querySelectorAll('[data-mode]').forEach((b) => b.addEventListener('click', () => {
-    state.process.mode = b.dataset.mode;
-    save();
-    renderAreas();
-  }));
-
   $('ex-base').addEventListener('input', renderExplain);
   $('ex-step').addEventListener('input', renderExplain);
 
@@ -760,7 +601,6 @@ function bind() {
     selected = next;
     renderBlocks();
     renderResult();
-    renderAreaValues();
     e.preventDefault();
   });
 

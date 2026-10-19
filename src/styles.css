@@ -95,7 +95,6 @@ h3 { font-size: 0.9rem; color: var(--muted); font-weight: 600; margin-bottom: 4p
   grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
   grid-template-areas:
     "inputs result"
-    "areas areas"
     "history history"
     "explain formulas"
     "faq faq";
@@ -112,14 +111,13 @@ html[lang="en"] .faq-list[data-content-lang="de"] { display: none; }
 .inputs { grid-area: inputs; }
 .result { grid-area: result; align-self: start; }
 .history { grid-area: history; }
-.areas { grid-area: areas; }
 .explain { grid-area: explain; }
 .formulas { grid-area: formulas; }
 
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "inputs" "result" "areas" "history" "explain" "formulas" "faq";
+    grid-template-areas: "inputs" "result" "history" "explain" "formulas" "faq";
   }
 }
 
@@ -296,33 +294,6 @@ th { color: var(--muted); font-weight: 600; font-size: 0.76rem; text-transform: 
 td.num { font-family: var(--mono); text-align: right; }
 td.note { white-space: normal; color: var(--muted); }
 
-/* ---------- areas (process profile) ---------- */
-.areas p { margin: 4px 0 0; }
-.areas-formula {
-  margin: 0; padding: 10px 12px; background: var(--bg-2); border: 1px solid var(--line);
-  border-radius: 10px; font-size: 0.86rem; overflow-wrap: anywhere;
-}
-.areas-controls { align-items: flex-start; }
-.areas-controls .field { max-width: 300px; }
-#print-ratio { width: 120px; font-family: var(--mono); }
-.check { display: flex; gap: 10px; align-items: flex-start; max-width: 320px; cursor: pointer; padding-top: 20px; }
-.check input { accent-color: var(--accent); width: 18px; height: 18px; margin: 2px 0 0; flex: none; }
-.check b { display: block; font-size: 0.9rem; }
-.check small { color: var(--muted); font-size: 0.8rem; }
-#areas-table input {
-  width: 84px; padding: 5px 8px; font: 500 0.88rem var(--mono); text-align: right;
-}
-#areas-table tr.off td { opacity: 0.45; }
-#areas-table td.key { font: 0.74rem var(--mono); color: var(--muted); white-space: normal; min-width: 170px; }
-#areas-table td.set { font-weight: 700; }
-#areas-table td.set.changed { color: var(--accent); }
-#areas-table td.bad { color: var(--warn); }
-@media (max-width: 560px) {
-  /* Field names are long; on phones the factor columns matter more. */
-  #areas-table th:nth-child(2), #areas-table td.key { display: none; }
-  .check { padding-top: 0; }
-}
-
 /* ---------- explain / formulas ---------- */
 .explain p { margin: 0; color: var(--muted); }
 .explain-controls output { font-size: 0.9rem; }
@@ -341,7 +312,7 @@ svg .grid-line { stroke: var(--line); stroke-dasharray: 3 4; }
 @media print {
   :root { --bg: #fff; --card: #fff; --card-2: #fff; --bg-2: #fff; --text: #000; --muted: #444; --line: #bbb; }
   body { background: #fff; }
-  .top-actions, .inputs, .result, .areas, .explain, .formulas .tiny, .history .row .row, .foot { display: none !important; }
+  .top-actions, .inputs, .result, .explain, .formulas .tiny, .history .row .row, .foot { display: none !important; }
   .grid { display: block; }
   .card { box-shadow: none; border: 0; padding: 0; }
 }

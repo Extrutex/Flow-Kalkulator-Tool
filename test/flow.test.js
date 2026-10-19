@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import {
   range, METHODS, applyModifier, singleWall, chain, compareInterpretations,
   warnings, edgeHint, historyToCsv, stdev, round,
-  AREAS, effectiveFlow, keepEffectiveFactor, outerWallFactorFromWall, areaTable,
 } from '../src/flow.js';
 
 test('range has no floating point drift', () => {
@@ -91,67 +90,4 @@ test('CSV is semicolon separated and escapes notes', () => {
   assert.equal(head.split(';').length, 9);
   assert.ok(row.includes('"PLA; blau"'));
   assert.ok(row.includes('"say ""hi"""'));
-});
-
-test('areas match the OrcaSlicer process options', () => {
-  assert.equal(AREAS.length, 11);
-  assert.deepEqual(AREAS.filter((a) => a.always).map((a) => a.key),
-    ['top_solid_infill_flow_ratio', 'bottom_solid_infill_flow_ratio']);
-});
-
-test('effective flow multiplies filament, process and area factor', () => {
-  assert.equal(effectiveFlow(0.95, 1, 0.97), 0.9215);
-  assert.equal(effectiveFlow(0.95, 1.02, 1), 0.969);
-  assert.throws(() => effectiveFlow(0.95, 1, -0.1), RangeError);
-});
-
-test('keeping the effective flow rescales the factor', () => {
-  // 1.00 × 0.97 = 0.97 before; filament now 0.95 → factor 0.97/0.95
-  const f = keepEffectiveFactor(0.97, 1, 0.95);
-  assert.equal(round(f, 4), 1.0211);
-  assert.equal(round(effectiveFlow(0.95, 1, f), 6), 0.97);
-});
-
-test('single wall can correct the outer wall factor alone', () => {
-  assert.equal(round(outerWallFactorFromWall(1, 0.45, 0.47), 4), 0.9574);
-  assert.throws(() => outerWallFactorFromWall(1, 0.45, 0), RangeError);
-});
-
-test('area table: factors stay, effective flow follows the filament', () => {
-  const rows = areaTable({ oldFilament: 1, newFilament: 0.95, factors: { top: 0.97, outerWall: 0.98 } });
-  const top = rows.find((r) => r.id === 'top');
-  assert.equal(top.active, true);
-  assert.equal(top.setFactor, 0.97);
-  assert.equal(top.changed, false);
-  assert.equal(top.effOld, 0.97);
-  assert.equal(top.effNew, 0.9215);
-  // "set other flow ratios" off: the outer wall factor is ignored by Orca.
-  const wall = rows.find((r) => r.id === 'outerWall');
-  assert.equal(wall.active, false);
-  assert.equal(wall.effOld, 1);
-  assert.equal(wall.effNew, 0.95);
-});
-
-test('area table: keep effective mode rescales only active factors', () => {
-  const rows = areaTable({ oldFilament: 1, newFilament: 0.95, other: true, mode: 'effective', factors: { outerWall: 0.98 } });
-  const wall = rows.find((r) => r.id === 'outerWall');
-  assert.equal(wall.active, true);
-  assert.equal(wall.changed, true);
-  assert.equal(wall.effNew, wall.effOld);
-  // Untuned areas (1.0) follow the filament, or the calibration would be lost.
-  const inner = rows.find((r) => r.id === 'innerWall');
-  assert.equal(inner.changed, false);
-  assert.equal(inner.effNew, 0.95);
-  const off = areaTable({ oldFilament: 1, newFilament: 0.95, mode: 'effective', factors: { outerWall: 0.98 } });
-  assert.equal(off.find((r) => r.id === 'outerWall').changed, false);
-});
-
-test('area table: process flow ratio multiplies every area', () => {
-  const rows = areaTable({ oldFilament: 0.95, print: 1.02 });
-  assert.ok(rows.every((r) => r.effOld === 0.969));
-});
-
-test('area table without a new value keeps everything', () => {
-  const rows = areaTable({ oldFilament: 0.95, factors: { top: 0.97 } });
-  assert.ok(rows.every((r) => r.effOld === r.effNew && !r.changed));
 });

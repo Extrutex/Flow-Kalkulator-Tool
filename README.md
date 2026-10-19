@@ -53,12 +53,6 @@ history. Every applied value becomes the new baseline, the new 100 %.
 - **Calibration history per filament**: chart and table with the change per step
   and in total. Undo, CSV export (semicolon separated, opens directly in German Excel)
   and a printable protocol.
-- **Walls & surfaces (process profile)**: shows how OrcaSlicer's area flow ratios
-  (top/bottom surface, outer/inner wall, overhang, infill, gap fill, support, first layer)
-  stack on the filament value, what reaches the nozzle before and after calibrating,
-  and what to enter in the process profile. Either keep the factors (recommended)
-  or keep tuned areas at their effective flow. Flags a process flow ratio ≠ 1.00
-  and settings that leak into the flow test.
 - **"Why the new 100 % matters"**: interactive comparison of additive and percent
   corrections for any baseline.
 - German and English, dark and light theme, works on phones.
@@ -73,27 +67,6 @@ history. Every applied value becomes the new baseline, the new 100 %.
 | 🟣 | YOLO / YOLO Perfectionist | `old + modifier` |
 | 🟠 | 2-Pass (pass 1 and pass 2) | `old × (100 + modifier) / 100` |
 | 🩷 | Single-wall cube | `old × line_width / measured_wall` |
-
-### Walls and surfaces
-
-The filament flow ratio is the baseline. The flow ratios in the **process** profile
-(Quality → Walls and surfaces) are multipliers on top of it
-(`GCode.cpp`, OrcaSlicer):
-
-```
-effective = filament flow ratio × process flow ratio × area factor   (× first layer factor on layer 1)
-```
-
-- *Top surface* and *Bottom surface flow ratio* always apply. All other area factors
-  (and the first layer factor) only apply when **Set other flow ratios** is checked.
-- The flow test sets the top surface flow ratio and the process flow ratio to 1.00
-  on the test blocks, so the result is the pure filament value. Other area factors
-  are not reset; set them to 1.00 for a clean test.
-- After a new filament value the factors usually stay as they are, and every area
-  follows in proportion. To keep an area that is already tuned to an absolute value:
-  `new factor = old factor × old filament / new filament`.
-- Single-wall cube alternative: correct only the outer wall,
-  `outer wall factor = old factor × line width / measured wall`.
 
 Slicer formulas and block ranges follow the
 [OrcaSlicer wiki: Flow ratio calibration](https://github.com/OrcaSlicer/OrcaSlicer/wiki/flow_ratio_calib).
@@ -119,8 +92,6 @@ actually printed. The calculator picks the right formula.
 2. Pick the method you printed.
 3. Click the block with the smoothest top surface, or enter your caliper readings.
 4. Copy the new value into the filament profile and save it in OrcaSlicer.
-   Check **Walls & surfaces**: with the default "keep factors" the process profile
-   stays untouched; otherwise enter the rescaled factors there as well.
 5. Press **Apply and save as new baseline**. The value moves into the history and
    becomes the starting point for the next test.
 
@@ -181,10 +152,7 @@ den neuen Flow-Wert (Flow ratio, Extrusionsmultiplikator) für alle Methoden:
 
 Jeder übernommene Wert wird zur neuen Basis, also zu den neuen 100 %, und landet
 im Verlauf des jeweiligen Filaments, mit Diagramm, CSV-Export und druckbarem
-Protokoll. Der Abschnitt **Wände & Oberflächen** zeigt, wie die Flussverhältnisse
-im Prozessprofil (obere/untere Fläche, Außen-/Innenwand usw.) auf den Filament-Wert
-multipliziert werden: `effektiv = Filament × Prozess × Bereichsfaktor`. Die Faktoren
-bleiben nach der Kalibrierung normalerweise stehen und wandern mit. Funktioniert auch für Bambu Studio, PrusaSlicer und Klipper-Drucker.
+Protokoll. Funktioniert auch für Bambu Studio, PrusaSlicer und Klipper-Drucker.
 Oberfläche auf Deutsch und Englisch, alle Daten bleiben lokal im Browser.
 
 👉 **[Flow-Kalkulator öffnen](https://extrutex.github.io/Flow-Kalkulator-Tool/)**
