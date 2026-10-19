@@ -53,9 +53,10 @@ history. Every applied value becomes the new baseline, the new 100 %.
 - **Calibration history per filament**: chart and table with the change per step
   and in total. Undo, CSV export (semicolon separated, opens directly in German Excel)
   and a printable protocol.
-- **Walls & surfaces**: converts between the flow you want on an area (top/bottom
-  surface, outer/inner wall) and the factor to enter in OrcaSlicer's process profile,
-  with the calculation shown. Factor 1.00 means "same as the filament".
+- **Walls & surfaces**: give an area (top/bottom surface, outer/inner wall) a few
+  percent more or less than the filament and get the factor for OrcaSlicer's process
+  profile, with the printed flow shown. Factor 1.00 means "same as the filament".
+  Includes what to do when walls are fine but the top surface stays open.
 - **"Why the new 100 % matters"**: interactive comparison of additive and percent
   corrections for any baseline.
 - German and English, dark and light theme, works on phones.
@@ -78,7 +79,7 @@ on top of the filament flow ratio. `1.00` means: exactly the filament value.
 
 ```
 printed flow = filament flow ratio × area factor
-factor       = target flow / filament flow ratio      e.g. 0.92 / 0.875 = 1.051
+factor       = 1 + percent / 100      e.g. +3 % → 1.03 → 0.875 × 1.03 = 0.901
 ```
 
 Top and bottom surface always apply. Outer and inner wall only apply with
@@ -168,9 +169,9 @@ den neuen Flow-Wert (Flow ratio, Extrusionsmultiplikator) für alle Methoden:
 
 Jeder übernommene Wert wird zur neuen Basis, also zu den neuen 100 %, und landet
 im Verlauf des jeweiligen Filaments, mit Diagramm, CSV-Export und druckbarem
-Protokoll. Der Abschnitt **Wände & Oberflächen** rechnet zwischen gewünschtem Flow
-und Faktor im Prozessprofil um: `Faktor = Ziel-Flow / Filament-Flow`, z. B.
-0.92 / 0.875 = 1.051. Faktor 1.00 heißt: genau wie im Filament. Funktioniert auch für Bambu Studio, PrusaSlicer und Klipper-Drucker.
+Protokoll. Der Abschnitt **Wände & Oberflächen** rechnet zwischen Prozent mehr/weniger
+und Faktor im Prozessprofil um: +3 % auf der oberen Fläche = Faktor 1.03, gedruckt
+wird mit 0.875 × 1.03 = 0.901. Faktor 1.00 heißt: genau wie im Filament. Funktioniert auch für Bambu Studio, PrusaSlicer und Klipper-Drucker.
 Oberfläche auf Deutsch und Englisch, alle Daten bleiben lokal im Browser.
 
 👉 **[Flow-Kalkulator öffnen](https://extrutex.github.io/Flow-Kalkulator-Tool/)**

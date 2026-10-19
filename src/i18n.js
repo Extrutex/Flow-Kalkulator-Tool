@@ -100,10 +100,13 @@ export const STRINGS = {
     areasTitle: 'Wände & Oberflächen',
     areasBase: 'Filament-Flow im Profil:',
     areasIntro:
-      'Die Werte im Prozessprofil (Qualität → Wände und Oberflächen) sind Faktoren auf den Filament-Flow. 1.00 heißt: genau wie im Filament-Profil. Mehr Flow auf einer Fläche → Faktor über 1.00, weniger → unter 1.00. Gib den gewünschten Flow ein, der Rechner sagt dir den Faktor. Oder umgekehrt.',
-    areasTestNote:
-      'Beim Flow-Test druckt OrcaSlicer die Oberfläche mit Faktor 1.00, aber mit eigener Linienbreite (1,2 × Düse), eigenem Muster und eigener Geschwindigkeit. Ist die Fläche im Test geschlossen, im echten Druck aber nicht, liegt es oft an diesen Unterschieden. Dann ist ein Faktor über 1.00 das richtige Werkzeug.',
-    targetFlow: 'Ziel-Flow',
+      'Dein kalibrierter Wert bleibt im Filament-Profil stehen. Braucht eine Fläche etwas mehr oder weniger, stellst du das im Prozessprofil ein (Qualität → Wände und Oberflächen). Dort ist 1.00 = genau wie Filament. Gib einfach ein, wie viel Prozent mehr (+) oder weniger (−) die Fläche bekommen soll.',
+    tipsTitle: 'Wände passen, Oberfläche ist offen? Das ist normal.',
+    tip1: 'Obere Fläche um +2 % erhöhen, Probe drucken, bei Bedarf +4 %. Aufhören, sobald die Fläche geschlossen ist und noch keine Wülste hat. Filament-Wert und Wände nicht anfassen.',
+    tip2: 'Warum: Der Flow-Test druckt seine Oberfläche anders als dein Profil, nämlich breiter (1,2 × Düse), mit 5 oberen Schichten, eigenem Muster und eigener Geschwindigkeit. Der Testwert passt deshalb gut für Wände und Maße, die Oberfläche im echten Druck braucht oft ein paar Prozent mehr. Bei PETG fällt das oft besonders auf, weil der Testwert dort eher niedrig ausfällt.',
+    tip3: 'Bleibt sie trotz +4 bis +5 % offen, liegt es meist nicht am Flow: obere Schichten prüfen (mind. 4 bis 5 bzw. 0,8 bis 1 mm) und die Oberfläche langsamer drucken.',
+    morePercent: 'Mehr / weniger (%)',
+    printed: 'gedruckt',
     factor: 'Faktor in OrcaSlicer',
     sameAsFilament: '= wie Filament',
     otherOnly: 'wirkt nur mit Häkchen „Andere Flussverhältnisse festlegen“',
@@ -116,7 +119,7 @@ export const STRINGS = {
     k_bottom: 'Durchflussverhältnis untere Fläche',
     k_outerWall: 'Außenwand Durchflußrate',
     k_innerWall: 'Innenwand Durchflußrate',
-    f_area: 'Wände & Oberflächen',
+    f_area: 'Wände & Oberflächen (Faktor)',
   },
   en: {
     tagline: 'Flow ratio for OrcaSlicer: calculate, understand, document',
@@ -219,10 +222,13 @@ export const STRINGS = {
     areasTitle: 'Walls & surfaces',
     areasBase: 'Filament flow in profile:',
     areasIntro:
-      'The values in the process profile (Quality → Walls and surfaces) are factors on the filament flow. 1.00 means: exactly the filament value. More flow on an area → factor above 1.00, less → below 1.00. Enter the flow you want and get the factor, or the other way round.',
-    areasTestNote:
-      'In the flow test OrcaSlicer prints the top surface at factor 1.00, but with its own line width (1.2 × nozzle), pattern and speed. If the surface is closed in the test but not in a real print, these differences are often the reason. A factor above 1.00 is then the right tool.',
-    targetFlow: 'Target flow',
+      'Your calibrated value stays in the filament profile. If an area needs a bit more or less, set that in the process profile (Quality → Walls and surfaces). There 1.00 = exactly the filament value. Just enter how many percent more (+) or less (−) the area should get.',
+    tipsTitle: 'Walls are fine, top surface is open? That is normal.',
+    tip1: 'Raise the top surface by +2 %, print a sample, go to +4 % if needed. Stop as soon as the surface is closed and shows no ridges yet. Leave the filament value and walls alone.',
+    tip2: 'Why: the flow test prints its top surface differently from your profile, wider (1.2 × nozzle), with 5 top layers, its own pattern and speed. So the test value fits walls and dimensions well, while the top surface in a real print often needs a few percent more. PETG often shows this most, because its test value tends to come out low.',
+    tip3: 'If it stays open at +4 to +5 %, flow is usually not the cause: check the top layers (at least 4 to 5, or 0.8 to 1 mm) and print the top surface slower.',
+    morePercent: 'More / less (%)',
+    printed: 'printed',
     factor: 'Factor in OrcaSlicer',
     sameAsFilament: '= same as filament',
     otherOnly: 'only applies with “Set other flow ratios” checked',
@@ -235,7 +241,7 @@ export const STRINGS = {
     k_bottom: 'Bottom surface flow ratio',
     k_outerWall: 'Outer wall flow ratio',
     k_innerWall: 'Inner wall flow ratio',
-    f_area: 'Walls & surfaces',
+    f_area: 'Walls & surfaces (factor)',
   },
 };
 

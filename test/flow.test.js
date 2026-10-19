@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   range, METHODS, applyModifier, singleWall, chain, compareInterpretations,
   warnings, edgeHint, historyToCsv, stdev, round,
-  AREAS, areaFlow, areaFactor,
+  AREAS, areaFlow, factorFromPercent, percentFromFactor,
 } from '../src/flow.js';
 
 test('range has no floating point drift', () => {
@@ -97,23 +97,25 @@ test('area factor 1.00 prints exactly the filament value', () => {
   assert.equal(areaFlow(0.875, 1), 0.875);
 });
 
-test('target flow on a surface gives the factor for OrcaSlicer', () => {
-  // Filament 0.875, surface not closed, want 0.92 on top.
-  assert.equal(round(areaFactor(0.875, 0.92), 3), 1.051);
-  assert.equal(round(areaFactor(0.875, 0.90), 3), 1.029);
-  assert.equal(round(areaFactor(0.875, 0.95), 3), 1.086);
-  // Lower than the filament gives a factor below 1.
-  assert.equal(round(areaFactor(1, 0.97), 3), 0.97);
+test('"a bit more on the surface" in percent gives the factor', () => {
+  // PETG at 0.875, top surface slightly open: +3 % → factor 1.03 → prints 0.901.
+  assert.equal(factorFromPercent(3), 1.03);
+  assert.equal(areaFlow(0.875, factorFromPercent(3)), 0.90125);
+  assert.equal(factorFromPercent(-2), 0.98);
+  assert.equal(factorFromPercent(0), 1);
 });
 
-test('factor and target flow round-trip', () => {
-  const f = areaFactor(0.875, 0.92);
-  assert.equal(round(areaFlow(0.875, f), 6), 0.92);
+test('percent and factor round-trip', () => {
+  assert.equal(percentFromFactor(1.03), 3);
+  assert.equal(percentFromFactor(0.98), -2);
+  assert.equal(percentFromFactor(factorFromPercent(4.5)), 4.5);
 });
 
 test('area inputs are validated', () => {
-  assert.throws(() => areaFactor(0.875, 0), RangeError);
-  assert.throws(() => areaFactor(0, 0.9), RangeError);
+  assert.throws(() => factorFromPercent(-100), RangeError);
+  assert.throws(() => factorFromPercent(NaN), RangeError);
+  assert.throws(() => percentFromFactor(-1), RangeError);
+  assert.throws(() => areaFlow(0, 1), RangeError);
   assert.throws(() => areaFlow(0.875, -1), RangeError);
 });
 

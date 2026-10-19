@@ -105,7 +105,7 @@
         "name": "Im Filament steht 0.875, bei Wänden und Oberfläche 1.00 – muss der Wert hoch?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "1.00 im Prozessprofil heißt: genau wie im Filament-Profil, gedruckt wird also mit 0.875. Ist die Oberfläche nicht geschlossen, muss der Faktor über 1.00. Rechnung: Faktor = Ziel-Flow / Filament-Flow, z. B. 0.92 / 0.875 = 1.051. Den Faktor trägst du unter Qualität → Wände und Oberflächen ein."
+          "text": "1.00 im Prozessprofil heißt: genau wie im Filament-Profil, gedruckt wird also mit 0.875. Ist die Oberfläche nicht geschlossen, muss der Faktor über 1.00. Gib der oberen Fläche ein paar Prozent mehr: +3 % heißt Faktor 1.03, gedruckt wird dann mit 0.875 × 1.03 = 0.901. Den Faktor trägst du unter Qualität → Wände und Oberflächen bei „Durchflussverhältnis obere Fläche“ ein. Wände und Filament-Wert bleiben, wie sie sind."
         }
       },
       {
@@ -153,7 +153,7 @@
         "name": "The filament says 0.875 and walls and top surface say 1.00. Does the value have to go up?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "1.00 in the process profile means: exactly the filament value, so it prints at 0.875. If the top surface is not closed, the factor has to go above 1.00. Calculation: factor = target flow / filament flow, e.g. 0.92 / 0.875 = 1.051. Enter the factor under Quality → Walls and surfaces."
+          "text": "1.00 in the process profile means: exactly the filament value, so it prints at 0.875. If the top surface is not closed, the factor has to go above 1.00. Give the top surface a few percent more: +3 % means factor 1.03, which prints at 0.875 × 1.03 = 0.901. Enter the factor under Quality → Walls and surfaces as “Top surface flow ratio”. Walls and the filament value stay as they are."
         }
       },
       {
@@ -303,7 +303,14 @@
       </div>
       <p class="muted" data-i18n="areasIntro"></p>
       <div class="area-list" id="area-list"></div>
-      <p class="tiny muted" data-i18n="areasTestNote"></p>
+      <div class="area-tips">
+        <h3 data-i18n="tipsTitle"></h3>
+        <ol>
+          <li data-i18n="tip1"></li>
+          <li data-i18n="tip2"></li>
+          <li data-i18n="tip3"></li>
+        </ol>
+      </div>
     </section>
 
     <section class="card history">
@@ -345,7 +352,7 @@
         <div><h3 data-i18n="f_yolo"></h3><p class="mono">Flow<sub>neu</sub> = Flow<sub>alt</sub> + Modifier</p></div>
         <div><h3 data-i18n="f_pass"></h3><p class="mono">Flow<sub>neu</sub> = Flow<sub>alt</sub> × (100 + Modifier) / 100</p></div>
         <div><h3 data-i18n="f_wall"></h3><p class="mono">Flow<sub>neu</sub> = Flow<sub>alt</sub> × Soll / Ist</p></div>
-        <div><h3 data-i18n="f_area"></h3><p class="mono">Faktor = Ziel-Flow / Filament-Flow</p></div>
+        <div><h3 data-i18n="f_area"></h3><p class="mono">Faktor = 1 + Prozent / 100</p></div>
       </div>
       <p class="tiny muted">
         <a href="https://github.com/OrcaSlicer/OrcaSlicer/wiki/flow_ratio_calib" target="_blank" rel="noopener" data-i18n="source"></a>
@@ -373,7 +380,7 @@
         </details>
         <details>
           <summary>Im Filament steht 0.875, bei Wänden und Oberfläche 1.00 – muss der Wert hoch?</summary>
-          <p>1.00 im Prozessprofil heißt: genau wie im Filament-Profil, gedruckt wird also mit 0.875. Ist die Oberfläche nicht geschlossen, muss der Faktor über 1.00. Rechnung: Faktor = Ziel-Flow / Filament-Flow, z. B. 0.92 / 0.875 = 1.051. Den Faktor trägst du unter Qualität → Wände und Oberflächen ein.</p>
+          <p>1.00 im Prozessprofil heißt: genau wie im Filament-Profil, gedruckt wird also mit 0.875. Ist die Oberfläche nicht geschlossen, muss der Faktor über 1.00. Gib der oberen Fläche ein paar Prozent mehr: +3 % heißt Faktor 1.03, gedruckt wird dann mit 0.875 × 1.03 = 0.901. Den Faktor trägst du unter Qualität → Wände und Oberflächen bei „Durchflussverhältnis obere Fläche“ ein. Wände und Filament-Wert bleiben, wie sie sind.</p>
         </details>
         <details>
           <summary>Funktioniert der Rechner auch für Bambu Studio, PrusaSlicer oder Klipper-Drucker?</summary>
@@ -399,7 +406,7 @@
         </details>
         <details>
           <summary>The filament says 0.875 and walls and top surface say 1.00. Does the value have to go up?</summary>
-          <p>1.00 in the process profile means: exactly the filament value, so it prints at 0.875. If the top surface is not closed, the factor has to go above 1.00. Calculation: factor = target flow / filament flow, e.g. 0.92 / 0.875 = 1.051. Enter the factor under Quality → Walls and surfaces.</p>
+          <p>1.00 in the process profile means: exactly the filament value, so it prints at 0.875. If the top surface is not closed, the factor has to go above 1.00. Give the top surface a few percent more: +3 % means factor 1.03, which prints at 0.875 × 1.03 = 0.901. Enter the factor under Quality → Walls and surfaces as “Top surface flow ratio”. Walls and the filament value stay as they are.</p>
         </details>
         <details>
           <summary>Does it work for Bambu Studio, PrusaSlicer or Klipper printers?</summary>

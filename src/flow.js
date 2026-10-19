@@ -193,11 +193,16 @@ export function areaFlow(filament, factor) {
   return round(filament * factor, 6);
 }
 
-/** Factor to enter in OrcaSlicer so an area prints with the target flow. */
-export function areaFactor(filament, target) {
-  assertRatio(filament);
-  if (!Number.isFinite(target) || target <= 0) throw new RangeError('target flow must be > 0');
-  return round(target / filament, 6);
+/** "+3 % more than the filament" → factor 1.03 for OrcaSlicer. */
+export function factorFromPercent(percent) {
+  if (!Number.isFinite(percent) || percent <= -100) throw new RangeError('percent must be > -100');
+  return round(1 + percent / 100, 6);
+}
+
+/** Factor → percent more (+) or less (−) than the filament. */
+export function percentFromFactor(factor) {
+  if (!Number.isFinite(factor) || factor < 0) throw new RangeError('area factor must be >= 0');
+  return round((factor - 1) * 100, 4);
 }
 
 function assertRatio(r) {

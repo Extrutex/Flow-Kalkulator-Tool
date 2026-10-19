@@ -1,7 +1,7 @@
 import {
   METHODS, applyModifier, singleWall, chain, compareInterpretations,
   warnings, edgeHint, historyToCsv, relativeChangePct, round,
-  AREAS, areaFlow, areaFactor, FACTOR_LIMITS,
+  AREAS, areaFlow, factorFromPercent, percentFromFactor, FACTOR_LIMITS,
 } from './flow.js';
 import { STRINGS, detectLang } from './i18n.js';
 import { surfacePattern, gauge, historyChart, wallSection, wallDots, explainChart } from './charts.js';
@@ -290,7 +290,7 @@ function renderResult() {
 }
 
 // Area factors live per filament (f.areas[id]), like the value you set in
-// OrcaSlicer. The target flow is derived: filament × factor.
+// OrcaSlicer. Entered either as factor or as "% more/less than the filament".
 const areaFactorOf = (id) => fil().areas?.[id] ?? 1;
 
 function renderAreas() {
@@ -300,28 +300,28 @@ function renderAreas() {
     row.dataset.area = area.id;
     row.innerHTML = `
       <div class="name"><b></b><small class="key"></small><small class="tag"></small></div>
-      <label class="field"><span></span><input type="number" inputmode="decimal" step="0.005" min="0.1" max="3" data-role="target"></label>
+      <label class="field"><span></span><input type="number" inputmode="decimal" step="1" min="-50" max="100" data-role="percent"></label>
       <label class="field"><span></span><input type="number" inputmode="decimal" step="0.01" min="0" max="2" data-role="factor"></label>
       <div class="calc"></div>`;
     row.querySelector('.name b').textContent = t(`a_${area.id}`);
     row.querySelector('.key').textContent = state.lang === 'de' ? `${t(`k_${area.id}`)} · ${area.key}` : area.key;
     row.querySelector('.tag').textContent = area.always ? '' : t('otherOnly');
-    const [targetLabel, factorLabel] = row.querySelectorAll('.field span');
-    targetLabel.textContent = t('targetFlow');
+    const [percentLabel, factorLabel] = row.querySelectorAll('.field span');
+    percentLabel.textContent = t('morePercent');
     factorLabel.textContent = t('factor');
-    const target = row.querySelector('[data-role="target"]');
+    const percent = row.querySelector('[data-role="percent"]');
     const factor = row.querySelector('[data-role="factor"]');
-    target.addEventListener('input', () => {
-      const n = parseFloat(target.value.replace(',', '.'));
-      if (!(n > 0)) return;
-      setAreaFactor(area.id, areaFactor(fil().current, n));
+    percent.addEventListener('input', () => {
+      const n = parseFloat(percent.value.replace(',', '.'));
+      if (!(n > -100)) return;
+      setAreaFactor(area.id, factorFromPercent(n));
     });
     factor.addEventListener('input', () => {
       const n = parseFloat(factor.value.replace(',', '.'));
       if (!(n >= 0)) return;
       setAreaFactor(area.id, n);
     });
-    target.addEventListener('blur', renderAreaValues);
+    percent.addEventListener('blur', renderAreaValues);
     factor.addEventListener('blur', renderAreaValues);
     return row;
   }));
@@ -345,22 +345,18 @@ function renderAreaValues() {
     if (!row) continue;
     const factor = areaFactorOf(area.id);
     const flow = areaFlow(filament, factor);
-    const target = row.querySelector('[data-role="target"]');
+    const percent = row.querySelector('[data-role="percent"]');
     const factorInput = row.querySelector('[data-role="factor"]');
-    if (document.activeElement !== target) target.value = flow.toFixed(3);
+    if (document.activeElement !== percent) percent.value = String(round(percentFromFactor(factor), 2));
     if (document.activeElement !== factorInput) factorInput.value = factor.toFixed(3);
     const calc = row.querySelector('.calc');
     const same = Math.abs(factor - 1) < 1e-9;
     const bad = factor < FACTOR_LIMITS.min || factor > FACTOR_LIMITS.max;
     calc.className = `calc${same ? '' : ' changed'}${bad ? ' bad' : ''}`;
     calc.innerHTML = '<span></span> <b></b>';
-    if (same) {
-      calc.querySelector('span').textContent = `${fmtRatio(filament)} × 1.000 = ${flow.toFixed(3)}`;
-      calc.querySelector('b').textContent = t('sameAsFilament');
-    } else {
-      calc.querySelector('span').textContent = `${flow.toFixed(3)} ÷ ${fmtRatio(filament)} =`;
-      calc.querySelector('b').textContent = bad ? `${factor.toFixed(3)} (${t('factorRange')})` : factor.toFixed(3);
-    }
+    calc.querySelector('span').textContent = `${fmtRatio(filament)} × ${factor.toFixed(3)} =`;
+    if (bad) calc.querySelector('b').textContent = `${flow.toFixed(3)} (${t('factorRange')})`;
+    else calc.querySelector('b').textContent = `${flow.toFixed(3)} ${t(same ? 'sameAsFilament' : 'printed')}`;
   }
 }
 
