@@ -97,7 +97,31 @@
         "name": "Wo stelle ich den Flow-Wert in OrcaSlicer ein?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Der Flow-Wert (Flow ratio) steht im Filament-Profil. Nach der Kalibrierung trägst du den neuen Wert dort ein und speicherst das Profil."
+          "text": "Der Flow-Wert steht im Filament-Profil unter Flussverhältnis und Pressure Advance → Flussverhältnis (engl. Flow ratio). Nach der Kalibrierung trägst du den neuen Wert dort ein und speicherst das Profil. Die Flussverhältnisse im Prozessprofil (Wände, Oberflächen) sind Faktoren auf diesen Wert."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Muss ich die Flussverhältnisse für Wände und Oberflächen nach der Kalibrierung anpassen?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Meist nicht. Die Werte im Prozessprofil unter Qualität → Wände und Oberflächen sind Faktoren auf den Filament-Wert: effektiver Fluss = Filament-Flussverhältnis × Prozess-Flussverhältnis × Bereichsfaktor. Ändert sich der Filament-Wert, wandern alle Bereiche im gleichen Verhältnis mit. Nur wenn ein Bereich bereits auf einen absoluten Wert eingemessen ist, rechnest du seinen Faktor um: Faktor neu = Faktor alt × Filament alt / Filament neu."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Warum wirkt mein Außenwand- oder Innenwand-Faktor nicht?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In OrcaSlicer wirken ohne Weiteres nur „Durchflussverhältnis obere Fläche“ und „Durchflussverhältnis untere Fläche“. Alle anderen Bereichsfaktoren (Außenwand, Innenwand, Überhang, Füllung, Lückenfüllung, Stützen, erste Schicht) gelten erst, wenn „Andere Flussverhältnisse festlegen“ aktiviert ist."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Beeinflussen die Faktoren im Prozessprofil den Flow-Test?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Für die Testblöcke setzt OrcaSlicer das Durchflussverhältnis der oberen Fläche und das Prozess-Flussverhältnis auf 1.00, das Ergebnis ist also der reine Filament-Wert. Ist „Andere Flussverhältnisse festlegen“ aktiv, bleiben die übrigen Faktoren im Test wirksam. Für einen sauberen Test diese auf 1.00 stellen oder das Häkchen entfernen."
         }
       },
       {
@@ -137,7 +161,31 @@
         "name": "Where do I set the flow ratio in OrcaSlicer?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "The flow ratio lives in the filament profile. After calibrating, enter the new value there and save the profile."
+          "text": "The flow ratio lives in the filament profile under Flow ratio and Pressure Advance → Flow ratio. After calibrating, enter the new value there and save the profile. The flow ratios in the process profile (walls, surfaces) are factors on top of this value."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to adjust the wall and surface flow ratios after calibrating?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Usually not. The values in the process profile under Quality → Walls and surfaces are factors on top of the filament value: effective flow = filament flow ratio × process flow ratio × area factor. When the filament value changes, every area follows in proportion. Only if an area is already tuned to an absolute value do you rescale its factor: new factor = old factor × old filament / new filament."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does my outer or inner wall factor have no effect?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Out of the box OrcaSlicer only applies “Top surface flow ratio” and “Bottom surface flow ratio”. All other area factors (outer wall, inner wall, overhang, infill, gap fill, support, first layer) only apply once “Set other flow ratios” is checked."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do process profile factors affect the flow test?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "On the test blocks OrcaSlicer sets the top surface flow ratio and the process flow ratio to 1.00, so the result is the pure filament value. With “Set other flow ratios” checked, the other factors stay active during the test. For a clean test set them to 1.00 or uncheck the box."
         }
       },
       {
@@ -280,6 +328,38 @@
       <button type="button" class="btn primary" id="apply-btn" data-i18n="apply" disabled></button>
     </section>
 
+    <section class="card areas" id="areas">
+      <div>
+        <h2 data-i18n="areasTitle"></h2>
+        <p class="muted" data-i18n="areasIntro"></p>
+      </div>
+      <p class="areas-formula mono" data-i18n="areasFormula"></p>
+      <div class="row wrap areas-controls">
+        <label class="field">
+          <span data-i18n="printRatio"></span>
+          <input id="print-ratio" type="number" inputmode="decimal" step="0.01" min="0.5" max="1.5" value="1.00">
+          <small data-i18n="printRatioHint"></small>
+        </label>
+        <label class="check">
+          <input id="other-ratios" type="checkbox">
+          <span>
+            <b data-i18n="otherRatios"></b>
+            <small data-i18n="otherRatiosHint"></small>
+          </span>
+        </label>
+        <div class="field">
+          <span data-i18n="areasMode"></span>
+          <div class="seg" role="group" id="areas-mode">
+            <button type="button" data-mode="factor" data-i18n="modeFactor"></button>
+            <button type="button" data-mode="effective" data-i18n="modeEffective"></button>
+          </div>
+          <small id="areas-mode-hint"></small>
+        </div>
+      </div>
+      <div class="table-wrap"><table id="areas-table"></table></div>
+      <ul class="warnings" id="areas-notes"></ul>
+    </section>
+
     <section class="card history">
       <div class="row between">
         <h2 data-i18n="history"></h2>
@@ -319,6 +399,8 @@
         <div><h3 data-i18n="f_yolo"></h3><p class="mono">Flow<sub>neu</sub> = Flow<sub>alt</sub> + Modifier</p></div>
         <div><h3 data-i18n="f_pass"></h3><p class="mono">Flow<sub>neu</sub> = Flow<sub>alt</sub> × (100 + Modifier) / 100</p></div>
         <div><h3 data-i18n="f_wall"></h3><p class="mono">Flow<sub>neu</sub> = Flow<sub>alt</sub> × Soll / Ist</p></div>
+        <div><h3 data-i18n="f_area"></h3><p class="mono">Flow<sub>eff</sub> = Filament × Prozess × Bereich</p></div>
+        <div><h3 data-i18n="f_keep"></h3><p class="mono">Bereich<sub>neu</sub> = Bereich<sub>alt</sub> × Flow<sub>alt</sub> / Flow<sub>neu</sub></p></div>
       </div>
       <p class="tiny muted">
         <a href="https://github.com/OrcaSlicer/OrcaSlicer/wiki/flow_ratio_calib" target="_blank" rel="noopener" data-i18n="source"></a>
@@ -342,7 +424,19 @@
         </details>
         <details>
           <summary>Wo stelle ich den Flow-Wert in OrcaSlicer ein?</summary>
-          <p>Der Flow-Wert (Flow ratio) steht im Filament-Profil. Nach der Kalibrierung trägst du den neuen Wert dort ein und speicherst das Profil.</p>
+          <p>Der Flow-Wert steht im Filament-Profil unter Flussverhältnis und Pressure Advance → Flussverhältnis (engl. Flow ratio). Nach der Kalibrierung trägst du den neuen Wert dort ein und speicherst das Profil. Die Flussverhältnisse im Prozessprofil (Wände, Oberflächen) sind Faktoren auf diesen Wert.</p>
+        </details>
+        <details>
+          <summary>Muss ich die Flussverhältnisse für Wände und Oberflächen nach der Kalibrierung anpassen?</summary>
+          <p>Meist nicht. Die Werte im Prozessprofil unter Qualität → Wände und Oberflächen sind Faktoren auf den Filament-Wert: effektiver Fluss = Filament-Flussverhältnis × Prozess-Flussverhältnis × Bereichsfaktor. Ändert sich der Filament-Wert, wandern alle Bereiche im gleichen Verhältnis mit. Nur wenn ein Bereich bereits auf einen absoluten Wert eingemessen ist, rechnest du seinen Faktor um: Faktor neu = Faktor alt × Filament alt / Filament neu.</p>
+        </details>
+        <details>
+          <summary>Warum wirkt mein Außenwand- oder Innenwand-Faktor nicht?</summary>
+          <p>In OrcaSlicer wirken ohne Weiteres nur „Durchflussverhältnis obere Fläche“ und „Durchflussverhältnis untere Fläche“. Alle anderen Bereichsfaktoren (Außenwand, Innenwand, Überhang, Füllung, Lückenfüllung, Stützen, erste Schicht) gelten erst, wenn „Andere Flussverhältnisse festlegen“ aktiviert ist.</p>
+        </details>
+        <details>
+          <summary>Beeinflussen die Faktoren im Prozessprofil den Flow-Test?</summary>
+          <p>Für die Testblöcke setzt OrcaSlicer das Durchflussverhältnis der oberen Fläche und das Prozess-Flussverhältnis auf 1.00, das Ergebnis ist also der reine Filament-Wert. Ist „Andere Flussverhältnisse festlegen“ aktiv, bleiben die übrigen Faktoren im Test wirksam. Für einen sauberen Test diese auf 1.00 stellen oder das Häkchen entfernen.</p>
         </details>
         <details>
           <summary>Funktioniert der Rechner auch für Bambu Studio, PrusaSlicer oder Klipper-Drucker?</summary>
@@ -364,7 +458,19 @@
         </details>
         <details>
           <summary>Where do I set the flow ratio in OrcaSlicer?</summary>
-          <p>The flow ratio lives in the filament profile. After calibrating, enter the new value there and save the profile.</p>
+          <p>The flow ratio lives in the filament profile under Flow ratio and Pressure Advance → Flow ratio. After calibrating, enter the new value there and save the profile. The flow ratios in the process profile (walls, surfaces) are factors on top of this value.</p>
+        </details>
+        <details>
+          <summary>Do I need to adjust the wall and surface flow ratios after calibrating?</summary>
+          <p>Usually not. The values in the process profile under Quality → Walls and surfaces are factors on top of the filament value: effective flow = filament flow ratio × process flow ratio × area factor. When the filament value changes, every area follows in proportion. Only if an area is already tuned to an absolute value do you rescale its factor: new factor = old factor × old filament / new filament.</p>
+        </details>
+        <details>
+          <summary>Why does my outer or inner wall factor have no effect?</summary>
+          <p>Out of the box OrcaSlicer only applies “Top surface flow ratio” and “Bottom surface flow ratio”. All other area factors (outer wall, inner wall, overhang, infill, gap fill, support, first layer) only apply once “Set other flow ratios” is checked.</p>
+        </details>
+        <details>
+          <summary>Do process profile factors affect the flow test?</summary>
+          <p>On the test blocks OrcaSlicer sets the top surface flow ratio and the process flow ratio to 1.00, so the result is the pure filament value. With “Set other flow ratios” checked, the other factors stay active during the test. For a clean test set them to 1.00 or uncheck the box.</p>
         </details>
         <details>
           <summary>Does it work for Bambu Studio, PrusaSlicer or Klipper printers?</summary>

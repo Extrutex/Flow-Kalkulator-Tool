@@ -168,6 +168,95 @@ export function edgeHint(method, modifier) {
   return null;
 }
 
+// ---------- process profile: flow per area ----------
+//
+// OrcaSlicer (GCode.cpp, extrude path):
+//   effective = filament_flow_ratio × print_flow_ratio × area factor
+// Top and bottom surface factors always apply. All other area factors (and the
+// first-layer factor on layer 1) only apply when "set_other_flow_ratios" is on.
+// The filament value is the 100 %; the area factors are relative to it.
+// The flow calibration resets top surface and print_flow_ratio to 1.0 on the
+// test blocks, so the calibrated filament value is free of both.
+
+export const AREAS = [
+  { id: 'top', key: 'top_solid_infill_flow_ratio', always: true },
+  { id: 'bottom', key: 'bottom_solid_infill_flow_ratio', always: true },
+  { id: 'firstLayer', key: 'first_layer_flow_ratio', always: false },
+  { id: 'outerWall', key: 'outer_wall_flow_ratio', always: false },
+  { id: 'innerWall', key: 'inner_wall_flow_ratio', always: false },
+  { id: 'overhang', key: 'overhang_flow_ratio', always: false },
+  { id: 'sparseInfill', key: 'sparse_infill_flow_ratio', always: false },
+  { id: 'internalSolid', key: 'internal_solid_infill_flow_ratio', always: false },
+  { id: 'gapFill', key: 'gap_fill_flow_ratio', always: false },
+  { id: 'support', key: 'support_flow_ratio', always: false },
+  { id: 'supportInterface', key: 'support_interface_flow_ratio', always: false },
+];
+
+/** Range OrcaSlicer accepts for every area factor. */
+export const FACTOR_LIMITS = { min: 0, max: 2 };
+
+/** Flow that actually reaches the nozzle for one area. */
+export function effectiveFlow(filament, print, factor) {
+  assertRatio(filament);
+  assertRatio(print);
+  if (!Number.isFinite(factor) || factor < 0) throw new RangeError('area factor must be >= 0');
+  return round(filament * print * factor, 6);
+}
+
+/**
+ * Area factor that keeps the effective flow unchanged when the filament
+ * value moves from oldFilament to newFilament.
+ */
+export function keepEffectiveFactor(factor, oldFilament, newFilament) {
+  assertRatio(oldFilament);
+  assertRatio(newFilament);
+  return round((factor * oldFilament) / newFilament, 6);
+}
+
+/**
+ * Single-wall cube alternative: correct only the outer wall factor and leave
+ * the filament value alone. The cube wall is an outer wall, so its flow is
+ * filament × print × outer wall factor.
+ */
+export function outerWallFactorFromWall(factor, nominalWidth, measuredWidth) {
+  if (!(nominalWidth > 0) || !(measuredWidth > 0)) throw new RangeError('widths must be > 0');
+  if (!Number.isFinite(factor) || factor <= 0) throw new RangeError('area factor must be > 0');
+  return round((factor * nominalWidth) / measuredWidth, 6);
+}
+
+/**
+ * One row per area: is the factor active, what flows now, what flows after
+ * the new filament value, and which factor to enter in OrcaSlicer.
+ * mode 'factor':    leave the factors alone, effective flow follows the filament.
+ * mode 'effective': keep today's effective flow for tuned areas (factor != 1),
+ *                   their factors are rescaled. Areas at 1.0 follow the filament,
+ *                   otherwise the calibration would be undone for them.
+ */
+export function areaTable({ oldFilament, newFilament, print = 1, other = false, factors = {}, mode = 'factor' }) {
+  assertRatio(oldFilament);
+  const next = Number.isFinite(newFilament) ? newFilament : oldFilament;
+  assertRatio(next);
+  return AREAS.map((area) => {
+    const active = area.always || other;
+    const factor = Number.isFinite(factors[area.id]) ? factors[area.id] : 1;
+    const applied = active ? factor : 1;
+    const effOld = effectiveFlow(oldFilament, print, applied);
+    const keep = mode === 'effective' && active && Math.abs(factor - 1) > EPS;
+    const setFactor = keep ? keepEffectiveFactor(factor, oldFilament, next) : factor;
+    const effNew = effectiveFlow(next, print, active ? setFactor : 1);
+    return {
+      ...area,
+      active,
+      factor,
+      effOld,
+      effNew,
+      setFactor,
+      changed: Math.abs(setFactor - factor) > EPS,
+      outOfRange: setFactor < FACTOR_LIMITS.min || setFactor > FACTOR_LIMITS.max,
+    };
+  });
+}
+
 function assertRatio(r) {
   if (!Number.isFinite(r) || r <= 0) throw new RangeError('flow ratio must be a positive number');
 }
